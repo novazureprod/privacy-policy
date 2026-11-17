@@ -60,7 +60,7 @@ export function Intro({ onDone, children }: { onDone?: () => void; children?: Re
           <img
             src="/intro/logo-frame.png"
             alt="Novazure"
-            className="h-full w-full object-contain mix-blend-screen [mask-image:radial-gradient(ellipse_at_center,black_42%,transparent_72%)]"
+            className="h-full w-full object-contain mix-blend-screen [mask-image:radial-gradient(ellipse_30%_46%_at_center,black_50%,transparent_100%)]"
           />
         </div>
       )}

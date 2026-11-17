@@ -111,3 +111,10 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 - Titres et niches génériques (« Vidéo 1 » à « Vidéo 4 ») : à confirmer.
 - Lecture non vérifiée depuis l'environnement de travail : à tester dans un navigateur, et vérifier que les vidéos ne sont pas privées.
 - Ajout des vingt vidéos prévues : une entrée par vidéo dans `lib/portfolio.ts`.
+
+## Responsive (v6)
+
+- Vérifié sans débordement horizontal à 1920, 1280, 768 et 390 px.
+- Livre : format 4/3 sur téléphone, 16/9 au-delà ; l'inclinaison ne se déclenche qu'à la souris, pour ne pas décaler la carte au toucher.
+- Logo d'intro : fondu sur les bords, pour masquer le cadre du PNG.
+- Restent à faire : tester le tunnel sur téléphone réel, et le défilement dans la page portfolio.

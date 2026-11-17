@@ -34,6 +34,7 @@ export function Book3D() {
         if (dx > 60) prev()
       }}
       onPointerMove={(e) => {
+        if (e.pointerType !== "mouse") return
         const r = e.currentTarget.getBoundingClientRect()
         setTilt({
           x: ((e.clientY - r.top) / r.height - 0.5) * -5,
@@ -42,7 +43,7 @@ export function Book3D() {
       }}
       onPointerLeave={() => setTilt({ x: 0, y: 0 })}
     >
-      <div className="relative aspect-video w-full" style={{ perspective: "1800px" }}>
+      <div className="relative aspect-[4/3] w-full sm:aspect-video" style={{ perspective: "1800px" }}>
         <div
           className="absolute inset-0 transition-transform duration-700 ease-out"
           style={{ transformStyle: "preserve-3d", transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }}

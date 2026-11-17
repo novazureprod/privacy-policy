@@ -54,7 +54,11 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 6. Agenda, contact, mentions légales.
 7. Revue responsive (téléphone d'abord), accessibilité, performances.
 
+## Décisions
+
+- **Agenda** : Calendly.
+- **Textes** (histoire, process, avis, chiffres) : rédigés ensemble, page par page.
+
 ## Questions ouvertes
 
-- Quel outil pour l'agenda ?
-- Avez-vous les textes (histoire, process, avis) ou faut-il les rédiger ?
+- Lancer la mise en place du projet (Next.js, TypeScript, Tailwind, shadcn, framer-motion) à la racine du dépôt ?

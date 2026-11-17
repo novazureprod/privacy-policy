@@ -79,3 +79,10 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
   3. Portfolio « book » en vedette, en 3D.
   4. Menu déroulant des niches, toujours accessible.
 - **Page restaurant** : à définir plus tard.
+
+## Effets retenus (v2)
+
+- **Fond** : particules lumineuses.
+- **Book 3D** : livre interactif, type « livre magique », avec les vidéos dans les pages. Le visiteur le tourne au curseur ou au doigt, et ouvre une vidéo en la touchant.
+- **Logo** : un phénix qui arrive en vol, puis se fixe à sa place. Au même moment, le texte d'accueil apparaît, avec l'animation de référence reçue plus tôt.
+- **À vérifier** : le logo en vectoriel (SVG), pour animer le tracé. Le fichier disponible est un PNG transparent (`logo-novazure-transparent-800.png`).

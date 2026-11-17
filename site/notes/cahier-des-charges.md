@@ -104,3 +104,10 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 - **Accueil — dossiers en verre** : une carte par niche, avec le composant glass-folder-cards. Les fichiers du dossier pointent vers la page de la niche.
 - **Page portfolio — tunnel 3D** : composant perspective-tunnel-hero. Les images sont des exemples à remplacer par les vraies images du portfolio.
 - **À revoir** : le tunnel capte la molette sur toute la page portfolio, ce qui bloque le défilement de la page. À corriger avant mise en ligne.
+
+## Vidéos du livre (v5)
+
+- Quatre vidéos YouTube dans `lib/portfolio.ts`, intégrées sans cookies (youtube-nocookie).
+- Titres et niches génériques (« Vidéo 1 » à « Vidéo 4 ») : à confirmer.
+- Lecture non vérifiée depuis l'environnement de travail : à tester dans un navigateur, et vérifier que les vidéos ne sont pas privées.
+- Ajout des vingt vidéos prévues : une entrée par vidéo dans `lib/portfolio.ts`.

@@ -86,3 +86,12 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 - **Book 3D** : livre interactif, type « livre magique », avec les vidéos dans les pages. Le visiteur le tourne au curseur ou au doigt, et ouvre une vidéo en la touchant.
 - **Logo** : un phénix qui arrive en vol, puis se fixe à sa place. Au même moment, le texte d'accueil apparaît, avec l'animation de référence reçue plus tôt.
 - **À vérifier** : le logo en vectoriel (SVG), pour animer le tracé. Le fichier disponible est un PNG transparent (`logo-novazure-transparent-800.png`).
+
+## Animation du phénix (v3)
+
+- **Source** : vidéo générée par IA, fournie par Novazure.
+- **Intégration** : la vidéo sert d'intro. Elle se termine sur la frame du logo, puis le logo statique prend le relais. Le texte d'accueil apparaît à ce moment.
+- **Fond** : vidéo sans fond (WebM avec transparence) si le phénix doit se détacher des particules, sinon vidéo sur fond noir mat, avec un fondu.
+- **Format souhaité** : MP4 pour le fond noir, WebM VP9 avec alpha pour la transparence, avec une version de secours MP4.
+- **Durée** : 3 à 4 secondes, pour ne pas retarder l'accueil.
+- **Mobile** : même vidéo, plus légère, ou une image fixe si le téléchargement est lent.

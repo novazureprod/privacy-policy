@@ -26,7 +26,8 @@ export function NicheMenu({ current }: { current?: string }) {
     }
   }, [open])
 
-  const currentLabel = NICHES.find((n) => n.slug === current)?.label ?? "Votre activité"
+  const currentLabel =
+    current === "portfolio" ? "Portfolio" : NICHES.find((n) => n.slug === current)?.label ?? "Votre activité"
 
   return (
     <div ref={root} className="relative">
@@ -54,6 +55,16 @@ export function NicheMenu({ current }: { current?: string }) {
               className="block rounded-xl px-4 py-3 font-body text-sm hover:bg-white/5"
             >
               Accueil
+            </Link>
+          </li>
+          <li role="none">
+            <Link
+              role="menuitem"
+              href="/portfolio"
+              onClick={() => setOpen(false)}
+              className="block rounded-xl px-4 py-3 font-body text-sm hover:bg-white/5"
+            >
+              Portfolio
             </Link>
           </li>
           {NICHES.map((n) => (

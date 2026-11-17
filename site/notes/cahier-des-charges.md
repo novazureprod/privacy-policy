@@ -95,3 +95,12 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 - **Format souhaité** : MP4 pour le fond noir, WebM VP9 avec alpha pour la transparence, avec une version de secours MP4.
 - **Durée** : 3 à 4 secondes, pour ne pas retarder l'accueil.
 - **Mobile** : même vidéo, plus légère, ou une image fixe si le téléchargement est lent.
+
+## Animations intégrées (v4)
+
+- **Accueil — phénix** : intro vidéo, puis logo fixe et texte d'accueil.
+- **Accueil — particules** : fond lumineux bleu et or.
+- **Accueil — livre 3D** : pages à tourner (clic, clavier, doigt).
+- **Accueil — dossiers en verre** : une carte par niche, avec le composant glass-folder-cards. Les fichiers du dossier pointent vers la page de la niche.
+- **Page portfolio — tunnel 3D** : composant perspective-tunnel-hero. Les images sont des exemples à remplacer par les vraies images du portfolio.
+- **À revoir** : le tunnel capte la molette sur toute la page portfolio, ce qui bloque le défilement de la page. À corriger avant mise en ligne.

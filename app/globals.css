@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Le site est toujours en thème sombre : la variante dark: suit la classe .dark */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Polices de la charte Novazure (fichiers dans public/fonts) */
 @font-face {
   font-family: "Open Sans";

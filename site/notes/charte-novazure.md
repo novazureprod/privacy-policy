@@ -20,14 +20,14 @@ Les reflets métalliques s'obtiennent par un dégradé linéaire bleu acier (`#1
 
 ## Typographie
 
-Polices : **à confirmer** — je n'ai pas trouvé de fichier de charte dans Notion ni dans le dépôt.
-Pour le moment, des valeurs de substitution sont indiquées ci-dessous.
+Polices (source : capture de la charte fournie par Novazure) :
 
-| Usage | Police | Statut |
-|-------|--------|--------|
-| Titres | à confirmer | — |
-| Texte | à confirmer | — |
-| Détails techniques | monospace système | substitution |
+| Usage | Police | Graisse | Remarque |
+|-------|--------|---------|----------|
+| Titres | Open Sans | ExtraBold | — |
+| Sous-titres | Cooper Hewitt | Light | en majuscules |
+| Texte courant | PT Sans | Regular | lisibilité |
+| Détails techniques | monospace système | — | substitution |
 
 ## Règles d'usage (brouillon)
 
@@ -49,14 +49,15 @@ Pour le moment, des valeurs de substitution sont indiquées ci-dessous.
   --nz-gold: #c9a227;
   --nz-gold-hover: #e0b94a;
   --nz-text: #f5f7fa;
-  --nz-font-display: "à confirmer", system-ui, sans-serif;
-  --nz-font-body: "à confirmer", system-ui, sans-serif;
+  --nz-font-display: "Open Sans", system-ui, sans-serif;     /* ExtraBold */
+  --nz-font-sub: "Cooper Hewitt", system-ui, sans-serif;     /* Light, uppercase */
+  --nz-font-body: "PT Sans", system-ui, sans-serif;
   --nz-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 ```
 
 ## À faire
 
-1. Confirmer les polices (noms exacts, ou fichiers à déposer dans `site/notes/` ou via le chat).
+1. Vérifier que ces trois polices sont bien celles de votre charte, et récupérer les fichiers (`.woff2`) à déposer dans `site/notes/charte/`.
 2. Valider la répartition 60/30/10 et les valeurs hexadécimales.
 3. Remplacer dans les composants reçus (tunnel, dossiers) les couleurs en dur par ces tokens.

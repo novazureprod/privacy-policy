@@ -62,3 +62,10 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 ## Questions ouvertes
 
 - Lancer la mise en place du projet (Next.js, TypeScript, Tailwind, shadcn, framer-motion) à la racine du dépôt ?
+
+## Décisions de théorie (v1)
+
+- **Parcours** : le visiteur choisit sa niche dès l'accueil, via un menu déroulant qui permet de revenir en arrière à tout moment.
+- **Structure** : une page d'accueil commune, puis une page spécifique par niche.
+- **Ton** : premium.
+- **Niche prioritaire** : restaurants. Elle sert de modèle pour la première page de niche.

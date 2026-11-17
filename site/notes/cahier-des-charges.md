@@ -18,15 +18,17 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 | Agenda | prise de rendez-vous | intégration à choisir |
 | Contact / mentions légales | formulaire, infos légales | — |
 
-## Niches proposées (d'après les dossiers Drive)
+## Niches (validées)
 
-- Restaurants et bars
-- Mariages et événements
-- Hébergements (Airbnb, villas, roulottes)
-- Domaines viticoles et hôtellerie
-- Entreprises et institutions (festivals, mairies, agences)
+1. Immobilier
+2. Restaurants
+3. Mariage
+4. Sociétés
+5. Associations
+6. Domaines viticoles
+7. Domaines de mariage
 
-À valider : la liste exacte et l'ordre dans le menu.
+À clarifier : « Mariage » (prestataires, couples) et « Domaines de mariage » (lieux) sont proches. Je les garde séparées, avec un speech distinct pour chacune.
 
 ## Effets visuels
 
@@ -54,6 +56,5 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 
 ## Questions ouvertes
 
-- Confirmez-vous la liste des niches ?
 - Quel outil pour l'agenda ?
 - Avez-vous les textes (histoire, process, avis) ou faut-il les rédiger ?

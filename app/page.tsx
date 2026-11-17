@@ -1,69 +1,104 @@
-import Image from "next/image";
+import Link from "next/link"
+import { Header } from "@/components/site/header"
+import { HomeHero } from "@/components/site/home-hero"
+import { NICHES, CALENDLY_URL } from "@/lib/niches"
 
-export default function Home() {
+// Contenus de démonstration : chiffres et avis à remplacer par des données réelles.
+const STATS = [
+  { value: "120+", label: "vidéos livrées" },
+  { value: "7", label: "secteurs accompagnés" },
+  { value: "48 h", label: "délai moyen de première version" },
+]
+
+const REVIEWS = [
+  { quote: "Un film qui nous ressemble, livré dans les temps.", who: "Exemple — restaurateur" },
+  { quote: "Des images élégantes qui ont vraiment aidé à vendre.", who: "Exemple — immobilier" },
+  { quote: "Le jour de notre mariage revécu avec justesse.", who: "Exemple — couple" },
+]
+
+const PROCESS = [
+  { step: "01", title: "Échange", text: "Nous définissons votre besoin et le message à faire passer." },
+  { step: "02", title: "Tournage", text: "Un vidéaste sur place, discret, avec un plan précis." },
+  { step: "03", title: "Montage", text: "Une première version, puis vos retours intégrés." },
+  { step: "04", title: "Livraison", text: "Les fichiers prêts pour vos supports et vos réseaux." },
+]
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="relative">
+      <Header />
+      <HomeHero />
+
+      <section className="px-5 py-24 sm:px-10">
+        <h2 className="metal-text text-center font-display text-3xl font-extrabold sm:text-4xl">Votre activité</h2>
+        <ul className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {NICHES.map((n) => (
+            <li key={n.slug}>
+              <Link
+                href={`/${n.slug}`}
+                className="glass glass-gold block rounded-2xl p-6 transition-colors"
+              >
+                <span className="font-sub text-[10px] tracking-[0.3em] text-[var(--nz-gold)] uppercase">
+                  Découvrir
+                </span>
+                <span className="mt-3 block font-display text-xl font-extrabold">{n.label}</span>
+                <span className="mt-2 block text-sm text-[var(--nz-muted)]">{n.headline}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="px-5 py-24 sm:px-10">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-3">
+          {STATS.map((s) => (
+            <div key={s.label} className="glass rounded-2xl p-8 text-center">
+              <div className="metal-text font-display text-4xl font-extrabold sm:text-5xl">{s.value}</div>
+              <div className="mt-3 font-sub text-xs tracking-[0.2em] text-[var(--nz-muted)] uppercase">{s.label}</div>
+            </div>
+          ))}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+        <p className="mt-4 text-center text-xs text-[var(--nz-muted)]">Chiffres d'exemple, à valider.</p>
+      </section>
+
+      <section className="px-5 py-24 sm:px-10">
+        <h2 className="metal-text text-center font-display text-3xl font-extrabold sm:text-4xl">Comment nous travaillons</h2>
+        <ol className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {PROCESS.map((p) => (
+            <li key={p.step} className="glass rounded-2xl p-6">
+              <span className="font-sub text-xs tracking-[0.2em] text-[var(--nz-gold)]">{p.step}</span>
+              <h3 className="mt-3 font-display text-lg font-extrabold">{p.title}</h3>
+              <p className="mt-2 text-sm text-[var(--nz-muted)]">{p.text}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="px-5 py-24 sm:px-10">
+        <h2 className="metal-text text-center font-display text-3xl font-extrabold sm:text-4xl">Avis clients</h2>
+        <ul className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-4 md:grid-cols-3">
+          {REVIEWS.map((r) => (
+            <li key={r.who} className="glass rounded-2xl p-6">
+              <p className="text-base leading-relaxed">« {r.quote} »</p>
+              <p className="mt-4 font-sub text-xs tracking-[0.15em] text-[var(--nz-gold)] uppercase">{r.who}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="px-5 py-28 text-center sm:px-10">
+        <h2 className="metal-text font-display text-3xl font-extrabold sm:text-4xl">Parlons de votre projet</h2>
+        <a
+          href={CALENDLY_URL}
+          className="glass glass-gold mt-8 inline-block rounded-full px-10 py-4 font-sub text-xs tracking-[0.2em] uppercase"
+        >
+          Prendre rendez-vous
+        </a>
+      </section>
+
+      <footer className="px-5 py-10 text-center text-xs text-[var(--nz-muted)] sm:px-10">
+        Novazure · Aix-en-Provence · Mentions légales à venir
+      </footer>
+    </main>
+  )
 }

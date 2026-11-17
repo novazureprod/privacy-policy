@@ -69,3 +69,13 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 - **Structure** : une page d'accueil commune, puis une page spécifique par niche.
 - **Ton** : premium.
 - **Niche prioritaire** : restaurants. Elle sert de modèle pour la première page de niche.
+
+## Vocabulaire et accueil (v1)
+
+- **Vocabulaire** : court et sobre. Phrases courtes, pas de superlatifs.
+- **Accueil, ordre de lecture** :
+  1. Animation du logo Novazure, sur fond dynamique.
+  2. Texte d'accueil très court (une phrase, une ligne d'action).
+  3. Portfolio « book » en vedette, en 3D.
+  4. Menu déroulant des niches, toujours accessible.
+- **Page restaurant** : à définir plus tard.

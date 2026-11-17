@@ -7,8 +7,9 @@ streaks in from the far left corner of a deep matte black frame, flying at high 
 toward the center. Its wings beat powerfully, leaving trails of light and small sparks.
 The motion accelerates, with a sweeping, slightly curved flight path, then decelerates
 and lands in the exact center of the frame, folding its wings into the final pose of the
-logo shown in the reference image. The form, proportions and silhouette must match the
-reference logo exactly. The phoenix holds still for one second, lit by a soft metallic
+logo shown in the reference image. The final phoenix must be the same as the reference image: identical shape, identical pose,
+identical wing and tail feathers, identical head and beak, identical proportions and colors.
+Do not reinterpret, redraw or stylize the logo; copy it exactly from the reference. The phoenix holds still for one second, lit by a soft metallic
 blue reflection that glides across its surface like light on polished steel. Then the
 reflection fades out, the phoenix dissolves gently into the black background, and the
 frame goes fully black.

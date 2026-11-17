@@ -33,3 +33,11 @@ Un phénix de lumière bleue et dorée arrive à grande vitesse depuis le coin g
 Il traverse l'écran en battant des ailes, puis ralentit au centre et se place dans la forme exacte
 du logo de référence. Il reste figé une seconde, un reflet bleu métallique glisse sur sa surface.
 Le reflet s'éteint, le phénix se dissout dans le noir.
+
+## Vidéo générée (v1)
+
+- Fichier source : `gemini_generated_video_47228398.mp4`, 1280×720, 10 s, avec son (retiré pour le site).
+- Déposée dans le projet : `public/intro/phenix-intro.mp4` (H.264) et `public/intro/phenix-intro.webm` (VP9), sans son.
+- Contenu vérifié : entrée par la gauche, vol, pose finale en badge doré avec le texte « NOVAZURE », puis dissolution en fumée.
+- Écarts avec le brief : durée 10 s au lieu de 4 s, le logo est fixe vers 6 s. Le badge est doré avec « NOVAZURE » en dessous, à comparer avec le PNG de la Drive pour vérifier la fidélité.
+- Résolution 720p : à remplacer par une version 1080p si la vidéo doit occuper tout l'écran.

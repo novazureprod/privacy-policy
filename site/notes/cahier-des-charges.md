@@ -118,3 +118,10 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 - Livre : format 4/3 sur téléphone, 16/9 au-delà ; l'inclinaison ne se déclenche qu'à la souris, pour ne pas décaler la carte au toucher.
 - Logo d'intro : fondu sur les bords, pour masquer le cadre du PNG.
 - Restent à faire : tester le tunnel sur téléphone réel, et le défilement dans la page portfolio.
+
+## Intro v2 (v7)
+
+- Nouvelle vidéo du phénix dans `public/intro/phenix-intro-v2.{mp4,webm}`, sans son.
+- Fondu au noir sur les 1,4 dernières secondes : le logo disparaît proprement à la fin.
+- Le site n'affiche plus le logo fixe : après la vidéo, seul le texte d'accueil apparaît.
+- `public/intro/logo-frame-v2.png` : image du logo extraite à 7,9 s, gardée pour un usage futur (ex. vignette).

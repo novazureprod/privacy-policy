@@ -17,7 +17,7 @@ export function HomeHero() {
         <Particles />
         <Intro onDone={onDone}>
           <div
-            className={`absolute inset-x-0 top-[62svh] bottom-0 z-10 flex flex-col items-center justify-start px-6 pt-4 text-center transition-all duration-[1400ms] ease-out ${
+            className={`absolute inset-x-0 top-1/2 bottom-0 z-10 flex flex-col items-center justify-start px-6 pt-4 text-center transition-all duration-[1400ms] ease-out ${
               ready ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
             }`}
           >

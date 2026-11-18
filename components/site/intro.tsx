@@ -41,8 +41,8 @@ export function Intro({ onDone, children }: { onDone?: () => void; children?: Re
           onError={finish}
           aria-label="Animation du phénix Novazure"
         >
-          <source src="/intro/phenix-intro-v2.webm" type="video/webm" />
-          <source src="/intro/phenix-intro-v2.mp4" type="video/mp4" />
+          <source src="/intro/phenix-intro-v3.webm" type="video/webm" />
+          <source src="/intro/phenix-intro-v3.mp4" type="video/mp4" />
         </video>
       )}
       {children}

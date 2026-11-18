@@ -125,3 +125,8 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 - Fondu au noir sur les 1,4 dernières secondes : le logo disparaît proprement à la fin.
 - Le site n'affiche plus le logo fixe : après la vidéo, seul le texte d'accueil apparaît.
 - `public/intro/logo-frame-v2.png` : image du logo extraite à 7,9 s, gardée pour un usage futur (ex. vignette).
+
+## Intro v3 (v8)
+
+- Vidéo coupée à 8,8 s, avant l'éclair final, avec fondu au noir sur la seconde précédant la coupe.
+- Fichiers : `public/intro/phenix-intro-v3.{mp4,webm}`. Le site pointe désormais vers la v3.

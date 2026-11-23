@@ -39,9 +39,7 @@ export function HomeHero() {
       <div
         className={`px-5 py-20 transition-opacity duration-1000 sm:px-10 ${ready ? "opacity-100" : "opacity-0"}`}
       >
-        <p className="mb-10 text-center font-sub text-xs tracking-[0.3em] text-[var(--nz-muted)] uppercase">
-          Portfolio
-        </p>
+        <p className="mb-10 text-center font-sub text-xs tracking-[0.3em] text-[var(--nz-muted)] uppercase">Nos réalisations</p>
         <Book3D />
       </div>
     </section>

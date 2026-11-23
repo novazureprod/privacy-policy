@@ -142,3 +142,10 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 - Fond unique pour toutes les pages : nappes bleues et dorées qui dérivent lentement, trame de points, particules lumineuses.
 - Calque fixe derrière le contenu (`components/site/ambient-background.tsx`). Le fond du `body` est devenu transparent, sinon il masquait le calque.
 - Mouvement désactivé si l'utilisateur préfère moins d'animations.
+
+## Réalisations en livre (v11)
+
+- Section « Nos réalisations » sur l'accueil : livre fermé à ouvrir (couverture), table des matières cliquable, puis une feuille par vidéo.
+- Chaque feuille : vidéo YouTube à droite, fiche (niche, titre, lien YouTube) à gauche. Pages tournées en 3D, clic, flèches, glissement.
+- Vidéos chargées seulement pour la page affichée et ses voisines.
+- À remplacer : titres et niches (« Vidéo 1 » à « Vidéo 4 »), à compléter jusqu'à vingt.

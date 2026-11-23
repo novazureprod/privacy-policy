@@ -2,18 +2,8 @@ import Link from "next/link"
 import { Header } from "@/components/site/header"
 import { HomeHero } from "@/components/site/home-hero"
 import { NICHES, CALENDLY_URL } from "@/lib/niches"
-import GlassFolder, { type ArtPreset } from "@/components/ui/glass-folder-cards"
+import { NicheFolders } from "@/components/site/niche-folders"
 
-// Une couleur de dossier par niche, dans la palette bleu / or de la charte.
-const FOLDER_ART: Record<string, ArtPreset> = {
-  restaurants: "ember",
-  immobilier: "glacier",
-  mariage: "dusk",
-  societes: "glacier",
-  associations: "verdant",
-  "domaines-viticoles": "verdant",
-  "domaines-de-mariage": "dusk",
-}
 
 // Contenus de démonstration : chiffres et avis à remplacer par des données réelles.
 const STATS = [
@@ -43,26 +33,7 @@ export default function HomePage() {
 
       <section className="px-5 py-24 sm:px-10">
         <h2 className="metal-text text-center font-display text-3xl font-extrabold sm:text-4xl">Votre activité</h2>
-        <div className="mx-auto mt-14 grid max-w-6xl grid-cols-1 justify-items-center gap-x-10 gap-y-14 md:grid-cols-2 xl:grid-cols-3">
-          {NICHES.map((n) => (
-            <div key={n.slug} className="flex flex-col items-center gap-4">
-              <GlassFolder
-                label={n.label}
-                meta={n.headline}
-                tone="dark"
-                art={FOLDER_ART[n.slug] ?? "glacier"}
-                seed={n.label.length}
-                action="none"
-                labelPlacement="top-left"
-                width={300}
-                files={n.offer.map((o) => ({ name: o, meta: n.label, href: `/${n.slug}` }))}
-              />
-              <Link href={`/${n.slug}`} className="glass glass-gold rounded-full px-5 py-2 font-sub text-[10px] tracking-[0.25em] uppercase">
-                Découvrir
-              </Link>
-            </div>
-          ))}
-        </div>
+        <NicheFolders />
       </section>
 
       <section className="px-5 py-24 sm:px-10">

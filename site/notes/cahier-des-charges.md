@@ -130,3 +130,9 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 
 - Vidéo coupée à 8,8 s, avant l'éclair final, avec fondu au noir sur la seconde précédant la coupe.
 - Fichiers : `public/intro/phenix-intro-v3.{mp4,webm}`. Le site pointe désormais vers la v3.
+
+## Dossiers par niche (v9)
+
+- Alignés sur la vidéo de référence (composant glass-folder-cards) : dossiers clairs et sombres alternés, ouverture au clic, fichiers qui sortent du dossier, menu ··· (découvrir la niche, prendre rendez-vous).
+- Chaque fichier du dossier ouvre la page de la niche.
+- Sous-ligne : compteur de fichiers, pour ne pas passer sous le bouton ···.

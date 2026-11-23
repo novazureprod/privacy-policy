@@ -290,6 +290,7 @@ export function Book3D() {
       if (disposed) return
 
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      let scene_env: T.Texture | null = null
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
       renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1))
       renderer.shadowMap.enabled = true
@@ -303,7 +304,16 @@ export function Book3D() {
       renderer.domElement.style.display = "block"
       renderer.domElement.setAttribute("aria-label", "Livre des réalisations")
 
+      // Éclairage d'environnement réaliste (studio) : reflets et lumière indirecte
+      const { RoomEnvironment } = await import("three/examples/jsm/environments/RoomEnvironment.js")
+      const pmrem = new THREE.PMREMGenerator(renderer)
+      const envScene = new RoomEnvironment()
+      scene_env = pmrem.fromScene(envScene, 0.04).texture
+      envScene.dispose()
+
       const scene = new THREE.Scene()
+      // scene.environment = scene_env
+      scene.environmentIntensity = 0.45
       const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 50)
 
       // Lumière : une lampe au-dessus à gauche, une lumière de remplissage douce
@@ -659,11 +669,21 @@ export function Book3D() {
       renderer.domElement.addEventListener("click", onClick)
       renderer.domElement.style.cursor = "pointer"
 
+      // Tracé de chemins : une fois le livre posé, l'image s'affine jusqu'au photoréalisme
+      const { WebGLPathTracer } = await import("three-gpu-pathtracer")
+      const pathTracer: any = new WebGLPathTracer(renderer)
+      pathTracer.bounces = 5
+      pathTracer.filterGlossyFactor = 0.25
+      pathTracer.tiles.set(2, 2)
+      let ptOn = false
+      let settle = 0
+
       // Caméra : vue légèrement en plongée, qui s'adapte à la largeur
       const fit = () => {
         const w = el.clientWidth
         const h = el.clientHeight
         renderer.setSize(w, h, false)
+        if (pathTracer) pathTracer.reset()
         camera.aspect = w / h
         const narrow = w / h < 1.2
         camera.fov = narrow ? 34 : 26
@@ -680,6 +700,21 @@ export function Book3D() {
       const frame = () => {
         raf = requestAnimationFrame(frame)
         const now = performance.now()
+        const busy = animating || drag.active
+        if (busy) {
+          settle = 0
+          if (ptOn) ptOn = false
+        } else {
+          settle++
+          if (!ptOn && settle > 30) {
+            pathTracer.setScene(scene, camera)
+            ptOn = true
+          }
+        }
+        if (ptOn) {
+          pathTracer.renderSample()
+          return
+        }
         if (animating) {
           let any = false
           for (const l of leaves) {

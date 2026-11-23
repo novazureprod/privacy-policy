@@ -174,3 +174,10 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 - Glisser : la page suit le curseur, puis se pose si on dépasse la moitié, sinon elle revient.
 - Maillage plus fin (42 × 4) pour les courbes.
 - La version téléphone sera traitée à part.
+
+## Photoréalisme — tracé de chemins (v15)
+
+- Une fois le livre posé, le rendu passe en tracé de chemins (three-gpu-pathtracer) : lumière indirecte, ombres douces, reflets physiques. Pendant les pages qui bougent, le rendu reste temps réel.
+- Environnement de studio désactivé : il provoquait une erreur de shader (« cube_uv_reflection_fragment ») avec le tracé de chemins. À corriger.
+- Non vérifié visuellement : le tracé de chemins demande un GPU. Le test ici (rendu logiciel) ne permet pas de voir le résultat.
+- Pour un vrai photoréalisme, il faut des photos réelles (papier, cuir, bois) à la place des textures générées.

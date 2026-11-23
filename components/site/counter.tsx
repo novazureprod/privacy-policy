@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react"
 
-/** Compteur animé : monte jusqu'à `to` quand il apparaît à l'écran. */
+/** Compteur animé : affiche la vraie valeur (lisible sans JavaScript), puis remonte depuis 0 quand il apparaît à l'écran. */
 export function Counter({ to, suffix = "", duration = 1600 }: { to: number; suffix?: string; duration?: number }) {
   const ref = useRef<HTMLSpanElement>(null)
-  const [value, setValue] = useState(0)
+  const [value, setValue] = useState(to)
   useEffect(() => {
     const el = ref.current
     if (!el) return

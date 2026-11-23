@@ -162,7 +162,7 @@ export default function HomePage() {
         <Reveal className="text-center">
           <p className="eyebrow">Avis clients</p>
           <h2 id="titre-avis" className="metal-text mt-3 font-display text-3xl font-extrabold sm:text-5xl">
-            Ils nous ont fait confiance
+            Ce qu’ils en disent
           </h2>
         </Reveal>
         <ul className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-4 md:grid-cols-3">

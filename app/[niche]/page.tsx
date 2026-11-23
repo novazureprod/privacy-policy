@@ -35,7 +35,8 @@ export default async function NichePage({ params }: Props) {
   const n = getNiche(niche)
   if (!n) notFound()
 
-  const own = PORTFOLIO_VIDEOS.filter((v) => v.niche === n.label)
+  // Les films qui ont une miniature Novazure passent en premier : ce sont les plus aboutis.
+  const own = PORTFOLIO_VIDEOS.filter((v) => v.niche === n.label).sort((a, b) => Number(!!b.thumbnail) - Number(!!a.thumbnail))
   // Sans film dans cette activité, on montre une sélection de réalisations proches.
   // (domaines entre vignes et oliviers d'abord, puis grandes propriétés filmées au drone).
   const nearby = ["d-FN7cHAfos", "D47ijCVV8s4", "TevdZq2GGI0", "vfAhIxz4dsg", "81I7ZjSea4k", "1bZuWZWbQ2M"]

@@ -96,7 +96,7 @@ export default function HomePage() {
             { n: 1, s: "", l: "interlocuteur, du tournage au montage" },
           ].map((s, i) => (
             <Reveal key={s.l} delay={i * 120}>
-              <div className="glass rounded-2xl p-8 text-center">
+              <div className="glass lift rounded-2xl p-8 text-center">
                 <div className="metal-text font-display text-5xl font-extrabold">
                   <Counter to={s.n} suffix={s.s} />
                 </div>
@@ -106,6 +106,8 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      <div className="divider" aria-hidden="true"><span /></div>
 
       <section id="process" className="px-5 py-24 sm:px-10" aria-labelledby="titre-process">
         <Reveal className="text-center">
@@ -118,7 +120,7 @@ export default function HomePage() {
           {PROCESS.map((p, i) => (
             <li key={p.step}>
               <Reveal delay={i * 100} className="h-full">
-                <div className="glass h-full rounded-2xl p-6">
+                <div className="glass lift h-full rounded-2xl p-6">
                   <span className="font-sub text-xs tracking-[0.2em] text-[var(--nz-gold)]">{p.step}</span>
                   <h3 className="mt-3 font-display text-lg font-extrabold">{p.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-[var(--nz-muted)]">{p.text}</p>
@@ -128,6 +130,8 @@ export default function HomePage() {
           ))}
         </ol>
       </section>
+
+      <div className="divider" aria-hidden="true"><span /></div>
 
       <section id="histoire" className="px-5 py-24 sm:px-10" aria-labelledby="titre-histoire">
         <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1fr_1.2fr]">
@@ -165,7 +169,7 @@ export default function HomePage() {
           {REVIEWS.map((r, i) => (
             <li key={r.who}>
               <Reveal delay={i * 120} className="h-full">
-                <figure className="glass h-full rounded-2xl p-7">
+                <figure className="glass lift h-full rounded-2xl p-7">
                   <span aria-hidden="true" className="font-display text-4xl leading-none text-[var(--nz-gold)]">
                     “
                   </span>
@@ -178,6 +182,8 @@ export default function HomePage() {
         </ul>
         <p className="mt-6 text-center text-xs text-[var(--nz-muted)]">Avis d&apos;exemple, à remplacer par de vrais témoignages.</p>
       </section>
+
+      <div className="divider" aria-hidden="true"><span /></div>
 
       <section className="px-5 py-24 sm:px-10" aria-labelledby="titre-faq">
         <Reveal className="text-center">

@@ -22,7 +22,7 @@ export function HomeHero() {
             }`}
           >
             <p className="eyebrow">Vidéaste · Drone · Côte d&apos;Azur</p>
-            <h1 className="metal-text mt-4 max-w-2xl font-display text-4xl leading-tight font-extrabold sm:text-6xl">
+            <h1 className="metal-sheen mt-4 max-w-2xl font-display text-4xl leading-tight font-extrabold sm:text-6xl">
               Votre histoire, en mouvement.
             </h1>
             <p className="mt-4 max-w-md text-sm text-[var(--nz-muted)] sm:text-base">

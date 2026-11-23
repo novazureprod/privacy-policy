@@ -93,7 +93,7 @@ export default async function NichePage({ params }: Props) {
           {n.benefits.map((b, i) => (
             <li key={b.title}>
               <Reveal delay={i * 120} className="h-full">
-                <div className="glass h-full rounded-2xl p-7">
+                <div className="glass lift h-full rounded-2xl p-7">
                   <span className="font-sub text-xs tracking-[0.2em] text-[var(--nz-gold)]">0{i + 1}</span>
                   <h3 className="mt-3 font-display text-lg font-extrabold">{b.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-[var(--nz-muted)]">{b.text}</p>
@@ -127,7 +127,7 @@ export default async function NichePage({ params }: Props) {
           {n.offer.map((o, i) => (
             <li key={o}>
               <Reveal delay={i * 100} className="h-full">
-                <div className="glass flex h-full items-center gap-4 rounded-2xl p-6">
+                <div className="glass lift flex h-full items-center gap-4 rounded-2xl p-6">
                   <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-[var(--nz-gold)]" />
                   <span className="text-sm">{o}</span>
                 </div>

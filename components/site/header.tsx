@@ -68,7 +68,7 @@ export function Header({ current }: { current?: string }) {
       </div>
 
       {open && (
-        <nav id="menu-mobile" aria-label="Navigation mobile" className="glass mx-5 mt-3 grid gap-1 rounded-2xl p-2 lg:hidden">
+        <nav id="menu-mobile" aria-label="Navigation mobile" className="glass mx-5 mt-3 grid gap-1 rounded-2xl !bg-[rgba(10,12,16,0.94)] p-2 lg:hidden">
           {NAV.map((l) => (
             <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="rounded-xl px-4 py-3 text-base hover:bg-white/5">
               {l.label}

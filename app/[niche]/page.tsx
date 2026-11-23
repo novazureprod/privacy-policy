@@ -34,7 +34,9 @@ export default async function NichePage({ params }: Props) {
 
   const own = PORTFOLIO_VIDEOS.filter((v) => v.niche === n.label)
   // Sans film dans cette activité, on montre une sélection de réalisations proches.
-  const videos = own.length ? own : PORTFOLIO_VIDEOS.filter((v) => v.niche === "Domaines de mariage" || v.niche === "Immobilier").slice(0, 6)
+  // (domaines entre vignes et oliviers d'abord, puis grandes propriétés filmées au drone).
+  const nearby = ["d-FN7cHAfos", "D47ijCVV8s4", "TevdZq2GGI0", "vfAhIxz4dsg", "81I7ZjSea4k", "1bZuWZWbQ2M"]
+  const videos = own.length ? own : nearby.map((id) => PORTFOLIO_VIDEOS.find((v) => v.youtubeId === id)!).filter(Boolean)
   const hero = videos[0]
 
   return (

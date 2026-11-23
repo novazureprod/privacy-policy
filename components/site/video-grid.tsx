@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Play, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, Play, X } from "lucide-react"
 import { youtubeEmbed, type PortfolioVideo } from "@/lib/portfolio"
 
 /**
@@ -25,12 +25,28 @@ export function VideoGrid({
 
   const niches = useMemo(() => ["Toutes", ...Array.from(new Set(videos.map((v) => v.niche ?? "Réalisation")))], [videos])
   const shown = niche === "Toutes" ? videos : videos.filter((v) => v.niche === niche)
+  const isOpen = active !== null
+  const shownRef = useRef(shown)
+  useEffect(() => {
+    shownRef.current = shown
+  })
+
+  // Film précédent ou suivant dans la liste affichée (en boucle).
+  const step = (dir: number) =>
+    setActive((cur) => {
+      const list = shownRef.current
+      if (!cur || list.length < 2) return cur
+      const i = list.findIndex((v) => v.youtubeId === cur.youtubeId)
+      return list[(i + dir + list.length) % list.length]
+    })
 
   useEffect(() => {
-    if (!active) return
+    if (!isOpen) return
     closeRef.current?.focus()
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setActive(null)
+      if (e.key === "ArrowRight") step(1)
+      if (e.key === "ArrowLeft") step(-1)
     }
     document.addEventListener("keydown", onKey)
     const prev = document.body.style.overflow
@@ -40,7 +56,7 @@ export function VideoGrid({
       document.body.style.overflow = prev
       opener.current?.focus()
     }
-  }, [active])
+  }, [isOpen])
 
   return (
     <div>
@@ -113,6 +129,7 @@ export function VideoGrid({
             </div>
             <div className="aspect-video overflow-hidden rounded-2xl border border-[rgba(147,197,253,0.22)] bg-black">
               <iframe
+                key={active.youtubeId}
                 src={`${youtubeEmbed(active.youtubeId)}&autoplay=1`}
                 title={active.title}
                 allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
@@ -120,6 +137,19 @@ export function VideoGrid({
                 className="h-full w-full"
               />
             </div>
+            {shown.length > 1 && (
+              <div className="mt-4 flex items-center justify-center gap-3">
+                <button type="button" onClick={() => step(-1)} className="glass glass-gold grid h-11 w-11 place-items-center rounded-full" aria-label="Film précédent">
+                  <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                </button>
+                <span className="font-sub text-[11px] tracking-[0.2em] text-[var(--nz-muted)] uppercase">
+                  {shown.findIndex((v) => v.youtubeId === active.youtubeId) + 1} / {shown.length}
+                </span>
+                <button type="button" onClick={() => step(1)} className="glass glass-gold grid h-11 w-11 place-items-center rounded-full" aria-label="Film suivant">
+                  <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

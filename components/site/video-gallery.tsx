@@ -1,24 +1,34 @@
 "use client"
 
-import { SpiralFilmGallery, type FilmFrame } from "@/components/ui/spiral-film-gallery"
+import { useEffect, useRef } from "react"
+import { mountFilmReel, type ReelItem } from "@/lib/film-reel"
 import { PORTFOLIO_VIDEOS } from "@/lib/portfolio"
 
-// Une vignette par vidéo : miniature maison (sinon YouTube), titre et niche.
-// Un clic ouvre la vidéo sur YouTube.
-const frames: FilmFrame[] = PORTFOLIO_VIDEOS.map((v) => ({
+// Une image par vidéo, au format paysage, dans public/films (miniatures Novazure ou captures).
+const items: ReelItem[] = PORTFOLIO_VIDEOS.map((v) => ({
   id: v.youtubeId,
-  image: v.thumbnail ?? `https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg`,
+  image: `/films/${v.youtubeId}.jpg`,
   title: v.title,
-  subtitle: v.niche ?? "Réalisation",
 }))
 
 export function VideoGallery() {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    return mountFilmReel(ref.current, items, (it) =>
+      window.open(`https://www.youtube.com/watch?v=${it.id}`, "_blank", "noopener"),
+    )
+  }, [])
   return (
-    <div className="h-[85svh] min-h-[560px] w-full">
-      <SpiralFilmGallery
-        frames={frames}
-        onSelect={(f) => window.open(`https://www.youtube.com/watch?v=${f.id}`, "_blank", "noopener")}
-      />
+    <div>
+      <div ref={ref} className="h-[80svh] min-h-[520px] w-full overflow-hidden" role="region" aria-label="Pellicule des réalisations Novazure" />
+      <ul className="sr-only">
+        {PORTFOLIO_VIDEOS.map((v) => (
+          <li key={v.youtubeId}>
+            <a href={`https://www.youtube.com/watch?v=${v.youtubeId}`}>{v.title}</a>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

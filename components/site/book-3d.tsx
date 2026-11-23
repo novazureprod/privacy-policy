@@ -338,7 +338,7 @@ export function Book3D() {
 
       // Lumière : une lampe au-dessus à gauche, une lumière de remplissage douce
       const key = new THREE.DirectionalLight(0xffe2b0, 3.2)
-      key.position.set(-2.4, 4.2, 2.6)
+      key.position.set(-1.6, 4.4, 1.2)
       key.castShadow = true
       key.shadow.mapSize.set(2048, 2048)
       key.shadow.camera.left = -2.6
@@ -346,12 +346,23 @@ export function Book3D() {
       key.shadow.camera.top = 2.2
       key.shadow.camera.bottom = -2.2
       key.shadow.bias = -0.0004
-      key.shadow.radius = 4
+      key.shadow.radius = 10
+      key.shadow.blurSamples = 16
       scene.add(key)
       scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x1a120c, 0.7))
       const fill = new THREE.DirectionalLight(0x9db8ff, 0.5)
       fill.position.set(2.5, 2, -1.5)
       scene.add(fill)
+
+      // Sol invisible : ne reçoit que l'ombre du livre, pour qu'il paraisse suspendu sans décor
+      const shadowFloor = new THREE.Mesh(
+        new THREE.PlaneGeometry(12, 12),
+        new THREE.ShadowMaterial({ opacity: 0.55 }),
+      )
+      shadowFloor.rotation.x = -Math.PI / 2
+      shadowFloor.position.y = -0.35
+      shadowFloor.receiveShadow = true
+      scene.add(shadowFloor)
 
       // Planche de couverture et tranches des pages
       const leather = new THREE.MeshStandardMaterial({ color: 0x131d33, roughness: 0.7 })

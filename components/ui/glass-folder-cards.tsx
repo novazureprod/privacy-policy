@@ -685,7 +685,7 @@ export default function GlassFolder({
   }
 
   const menuItems: FolderMenuItem[] = [
-    { label: open ? "Close folder" : "Open folder", onSelect: () => setOpen(!open) },
+    { label: open ? "Fermer le dossier" : "Ouvrir le dossier", onSelect: () => setOpen(!open) },
     ...menu,
   ]
 
@@ -707,7 +707,7 @@ export default function GlassFolder({
   const start = Math.max(0, files.length - MAX_VISIBLE)
   const visible = files.slice(start)
   const count = files.length
-  const metaLine = meta ?? count + (count === 1 ? " item" : " items")
+  const metaLine = meta ?? count + (count === 1 ? " offre" : " offres")
 
   return (
     <div
@@ -760,7 +760,7 @@ export default function GlassFolder({
               type="button"
               className="gf-hit"
               aria-expanded={open}
-              aria-label={(open ? "Close " : "Open ") + label + ", " + count + (count === 1 ? " item" : " items")}
+              aria-label={(open ? "Fermer " : "Ouvrir ") + label + ", " + count + (count === 1 ? " offre" : " offres")}
               onClick={() => {
                 setMenuOpen(false)
                 setOpen(!open)
@@ -844,7 +844,7 @@ export default function GlassFolder({
               ref={keyRef}
               type="button"
               className={"gf-key gf-key--" + action}
-              aria-label={action === "add" ? "Add a file to " + label : "More options for " + label}
+              aria-label={action === "add" ? "Ajouter un fichier à " + label : "Plus d’options pour " + label}
               aria-haspopup={action === "more" ? "menu" : undefined}
               aria-expanded={action === "more" ? menuOpen : undefined}
               aria-controls={action === "more" ? "gf-menu-" + uid : undefined}

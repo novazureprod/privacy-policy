@@ -33,7 +33,7 @@ interface TunnelCardData {
     index: number;
 }
 
-const TUNNEL_CARDS: TunnelCardData[] = IMAGES.map((item, i) => {
+const buildCards = (images: { src: string; title: string }[]): TunnelCardData[] => images.map((item, i) => {
     const goldenAngle = i * 137.5 * (Math.PI / 180);
     const radiusFactorX = 0.28 + (i % 3) * 0.08;
     const radiusFactorY = 0.26 + (i % 2) * 0.09;
@@ -141,7 +141,22 @@ function TunnelCard({ card, progress, pointer, total, stage }: TunnelCardProps) 
     );
 }
 
-export default function PerspectiveTunnelHero() {
+type TunnelProps = {
+    images?: { src: string; title: string }[];
+    eyebrow?: string;
+    title?: React.ReactNode;
+    subtitle?: string;
+    prompt?: string;
+};
+
+export default function PerspectiveTunnelHero({
+    images = IMAGES,
+    eyebrow = "Warp Drive Sequence",
+    title = (<>INTO THE<br />ETHER.</>),
+    subtitle = "Scroll your trackpad or mouse wheel to fly through the spatial 3D corridor.",
+    prompt = "Scroll to Explore",
+}: TunnelProps = {}) {
+    const TUNNEL_CARDS = buildCards(images);
     const containerRef = useRef<HTMLDivElement>(null);
     const reduce = useReducedMotion();
 
@@ -179,8 +194,10 @@ export default function PerspectiveTunnelHero() {
         if (!el) return;
 
         const handleWheel = (e: WheelEvent) => {
-            e.preventDefault();
             const current = rawProgress.get();
+            // Au bout du tunnel (ou au début en remontant), la molette fait défiler la page.
+            if ((e.deltaY > 0 && current >= 1) || (e.deltaY < 0 && current <= 0)) return;
+            e.preventDefault();
             const delta = e.deltaY * 0.0008; // Adjust speed of tunnel travel here
             const next = Math.min(1, Math.max(0, current + delta));
             rawProgress.set(next);
@@ -199,7 +216,7 @@ export default function PerspectiveTunnelHero() {
     return (
         <div
             ref={containerRef}
-            className="relative h-[100svh] w-screen overflow-hidden bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-white select-none flex items-center justify-center"
+            className="relative h-[100svh] w-full overflow-hidden text-white select-none flex items-center justify-center"
             style={{
                 perspective: stage.isMobile ? "900px" : "1200px",
                 transformStyle: "preserve-3d",
@@ -218,26 +235,24 @@ export default function PerspectiveTunnelHero() {
                 style={{ scale: titleScale, opacity: titleOpacity }}
                 className="pointer-events-none z-0 flex flex-col items-center text-center px-6 max-w-xl"
             >
-                <p className="text-xs font-mono uppercase tracking-[0.4em] text-indigo-600 dark:text-indigo-400 mb-4">
-                    Warp Drive Sequence
+                <p className="font-sub text-xs uppercase tracking-[0.4em] text-[var(--nz-gold)] mb-4">
+                    {eyebrow}
                 </p>
-                <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tighter leading-[0.9] bg-gradient-to-b from-neutral-950 via-neutral-800 to-neutral-400 dark:from-white dark:via-white dark:to-white/40 bg-clip-text text-transparent">
-                    INTO THE
-                    <br />
-                    ETHER.
+                <h1 className="metal-text font-display text-5xl sm:text-7xl md:text-8xl font-extrabold tracking-tight leading-[0.95]">
+                    {title}
                 </h1>
-                <p className="mt-4 max-w-[36ch] text-sm sm:text-base font-light text-neutral-600 dark:text-neutral-400">
-                    Scroll your trackpad or mouse wheel to fly through the spatial 3D corridor.
+                <p className="mt-4 max-w-[36ch] text-sm sm:text-base text-[var(--nz-muted)]">
+                    {subtitle}
                 </p>
             </motion.div>
 
             {/* Scroll Prompt */}
             <motion.div
                 style={{ opacity: promptOpacity }}
-                className="pointer-events-none absolute bottom-8 z-20 flex flex-col items-center gap-2 text-xs font-mono uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400"
+                className="pointer-events-none absolute bottom-8 z-20 flex flex-col items-center gap-2 font-sub text-xs uppercase tracking-[0.3em] text-[var(--nz-muted)]"
             >
-                <span>Scroll to Explore</span>
-                <div className="h-6 w-px bg-gradient-to-b from-indigo-500 to-transparent" />
+                <span>{prompt}</span>
+                <div className="h-6 w-px bg-gradient-to-b from-[var(--nz-gold)] to-transparent" />
             </motion.div>
 
             {/* 3D Z-Space Plane */}

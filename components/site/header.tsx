@@ -10,6 +10,22 @@ import { NAV } from "@/lib/site"
 export function Header({ current }: { current?: string }) {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const [section, setSection] = useState("")
+
+  // Sur l'accueil, le lien de la section affichée passe en or.
+  useEffect(() => {
+    const ids = ["activites", "process", "histoire", "contact"]
+    const els = ids.map((id) => document.getElementById(id)).filter((e): e is HTMLElement => !!e)
+    if (!els.length) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) if (e.isIntersecting) setSection(e.target.id)
+      },
+      { rootMargin: "-45% 0px -50% 0px" },
+    )
+    els.forEach((e) => io.observe(e))
+    return () => io.disconnect()
+  }, [])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
@@ -44,7 +60,9 @@ export function Header({ current }: { current?: string }) {
               key={l.href}
               href={l.href}
               className={`nav-link font-sub text-[11px] tracking-[0.22em] uppercase ${
-                current === "portfolio" && l.href === "/portfolio" ? "text-[var(--nz-gold)]" : "text-[var(--nz-text)]"
+                (current === "portfolio" && l.href === "/portfolio") || (section && l.href === `/#${section}`)
+                  ? "text-[var(--nz-gold)]"
+                  : "text-[var(--nz-text)]"
               }`}
             >
               {l.label}

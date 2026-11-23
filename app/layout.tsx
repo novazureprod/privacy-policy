@@ -29,6 +29,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr" className="dark">
+      <head>
+        {/* Polices de la charte : préchargées pour éviter le changement de police à l'affichage */}
+        <link rel="preload" href="/fonts/OpenSans-ExtraBold-latin.woff2" as="font" type="font/woff2" crossOrigin="" />
+        <link rel="preload" href="/fonts/PTSans-Regular-latin.woff2" as="font" type="font/woff2" crossOrigin="" />
+      </head>
       <body className="relative min-h-screen antialiased">
         <a
           href="#contenu"

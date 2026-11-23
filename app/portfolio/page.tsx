@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 }
 
 // Le tunnel reprend les images des films ; la molette le traverse, puis la page défile.
-const tunnelImages = PORTFOLIO_VIDEOS.slice(0, 12).map((v) => ({ src: `/films/${v.youtubeId}.jpg`, title: v.title }))
+const tunnelImages = PORTFOLIO_VIDEOS.slice(0, 12).map((v) => ({ src: `/films/${v.youtubeId}.webp`, title: v.title }))
 
 export default function PortfolioPage() {
   return (

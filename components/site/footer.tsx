@@ -1,11 +1,12 @@
 import Link from "next/link"
 import { NICHES } from "@/lib/niches"
 import { NAV, SITE } from "@/lib/site"
+import { FloatingActions } from "./floating-actions"
 
 /** Pied de page commun : navigation, activités, contact et pages légales. */
 export function Footer() {
   return (
-    <footer className="relative border-t border-[rgba(147,197,253,0.12)] px-5 pt-16 pb-10 sm:px-10">
+    <footer className="relative border-t border-[rgba(147,197,253,0.12)] px-5 pt-16 pb-28 sm:px-10 lg:pb-10">
       <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <p className="metal-text font-display text-lg font-extrabold tracking-[0.3em]">NOVAZURE</p>
@@ -77,6 +78,7 @@ export function Footer() {
           </Link>
         </p>
       </div>
+      <FloatingActions />
     </footer>
   )
 }

@@ -7,7 +7,7 @@ import { PORTFOLIO_VIDEOS } from "@/lib/portfolio"
 // Une image par vidéo, au format paysage, dans public/films (miniatures Novazure ou captures).
 const items: ReelItem[] = PORTFOLIO_VIDEOS.map((v) => ({
   id: v.youtubeId,
-  image: `/films/${v.youtubeId}.jpg`,
+  image: `/films/${v.youtubeId}.webp`,
   title: v.title,
 }))
 

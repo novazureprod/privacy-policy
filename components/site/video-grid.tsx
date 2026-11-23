@@ -91,7 +91,7 @@ export function VideoGrid({
               aria-label={`Lire la vidéo : ${v.title}`}
             >
               <span className="relative block aspect-video overflow-hidden">
-                <img src={`/films/${v.youtubeId}.jpg`} alt="" loading="lazy" className="h-full w-full object-cover" />
+                <img src={`/films/${v.youtubeId}.webp`} alt="" loading="lazy" className="h-full w-full object-cover" />
                 <span className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
                 <span className="play absolute top-1/2 left-1/2 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-[#14203a]">
                   <Play className="ml-0.5 h-5 w-5" aria-hidden="true" />

@@ -46,7 +46,7 @@ export default async function NichePage({ params }: Props) {
       <section className="relative flex min-h-[88svh] flex-col items-center justify-center overflow-hidden px-6 pt-28 pb-20 text-center">
         {hero && (
           <div className="absolute inset-0 -z-10">
-            <img src={`/films/${hero.youtubeId}.jpg`} alt="" className="h-full w-full scale-105 object-cover opacity-30 blur-[2px]" />
+            <img src={`/films/${hero.youtubeId}.webp`} alt="" className="h-full w-full scale-105 object-cover opacity-30 blur-[2px]" />
             <div className="absolute inset-0 bg-gradient-to-b from-[var(--nz-black)]/70 via-[var(--nz-black)]/40 to-[var(--nz-black)]" />
           </div>
         )}

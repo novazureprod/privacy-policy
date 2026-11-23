@@ -20,6 +20,8 @@ const PAGE_H = 0.72
 const SEG = 42 // découpage le long de la courbe (PC)
 const ROWS = 4 // découpage sur la hauteur (pour la bombe du papier)
 const TURN_MS = 1500
+// Tracé de chemins désactivé : il a besoin d'un fond pour le rendu, et le livre flotte désormais sans décor.
+const PT_ENABLED = false
 const STAGGER_MS = 110
 
 // Pages : P0 titre (intérieur de couverture), P1 sommaire, puis info / vue pour chaque vidéo, P10 fin.
@@ -332,20 +334,6 @@ export function Book3D() {
       const fill = new THREE.DirectionalLight(0x9db8ff, 0.5)
       fill.position.set(2.5, 2, -1.5)
       scene.add(fill)
-
-      // Table
-      const woodTex = new THREE.CanvasTexture(woodCanvas())
-      woodTex.colorSpace = THREE.SRGBColorSpace
-      woodTex.wrapS = woodTex.wrapT = THREE.RepeatWrapping
-      woodTex.repeat.set(1.2, 1.2)
-      const table = new THREE.Mesh(
-        new THREE.PlaneGeometry(14, 14),
-        new THREE.MeshStandardMaterial({ map: woodTex, roughness: 0.55, metalness: 0 }),
-      )
-      table.rotation.x = -Math.PI / 2
-      table.position.y = -0.04
-      table.receiveShadow = true
-      scene.add(table)
 
       // Planche de couverture et tranches des pages
       const leather = new THREE.MeshStandardMaterial({ color: 0x131d33, roughness: 0.7 })
@@ -706,7 +694,7 @@ export function Book3D() {
           if (ptOn) ptOn = false
         } else {
           settle++
-          if (!ptOn && settle > 30) {
+          if (PT_ENABLED && !ptOn && settle > 30) {
             pathTracer.setScene(scene, camera)
             ptOn = true
           }

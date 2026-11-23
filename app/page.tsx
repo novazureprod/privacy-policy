@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { Header } from "@/components/site/header"
 import { HomeHero } from "@/components/site/home-hero"
-import { Book3D } from "@/components/site/book-3d"
 import { VideoGallery } from "@/components/site/video-gallery"
 import { NICHES, CALENDLY_URL } from "@/lib/niches"
 import { NicheFolders } from "@/components/site/niche-folders"
@@ -33,13 +32,8 @@ export default function HomePage() {
       <Header />
       <HomeHero />
 
-      <section className="px-5 py-24 sm:px-10">
-        <p className="mb-10 text-center font-sub text-xs tracking-[0.3em] text-[var(--nz-muted)] uppercase">Nos réalisations</p>
-        <Book3D />
-      </section>
-
       <section className="py-24">
-        <p className="mb-6 text-center font-sub text-xs tracking-[0.3em] text-[var(--nz-muted)] uppercase">En orbite</p>
+        <p className="mb-6 text-center font-sub text-xs tracking-[0.3em] text-[var(--nz-muted)] uppercase">Nos réalisations</p>
         <VideoGallery />
       </section>
 

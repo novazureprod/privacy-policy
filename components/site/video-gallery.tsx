@@ -52,7 +52,10 @@ export function VideoGallery() {
       <ul className="sr-only">
         {PORTFOLIO_VIDEOS.map((v) => (
           <li key={v.youtubeId}>
-            <a href={`https://www.youtube.com/watch?v=${v.youtubeId}`}>{v.title}</a>
+            {/* Lue par les lecteurs d'écran ; au clavier, la grille de la page Réalisations prend le relais. */}
+            <a href={`https://www.youtube.com/watch?v=${v.youtubeId}`} tabIndex={-1}>
+              {v.title}
+            </a>
           </li>
         ))}
       </ul>

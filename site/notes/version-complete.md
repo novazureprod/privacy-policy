@@ -14,7 +14,8 @@ La branche d'origine (`ccr-a4b2a638-ugtgbi`) et son aperçu publié restent inta
 | Pages légales | Mentions légales et politique de confidentialité (champs à compléter surlignés en or). Page 404. |
 | Pied de page | Navigation, activités, contact, YouTube, pages légales. |
 | Finitions | Bandeau des clients (noms tirés des films publiés), bouton « Rendez-vous » fixe sur téléphone, retour en haut, section active en or dans le menu, bouton « Passer l'intro », lecteur vidéo avec film précédent/suivant (flèches du clavier). |
-| Performance | Images des films en WebP (−40 %), polices de la charte préchargées. |
+| Performance | Images des films en WebP (−40 %), polices préchargées, pellicule 3D (three.js + 26 images) chargée seulement à l'approche de la section : l'accueil pèse ~1,8 Mo au lieu de ~3,2 Mo au premier affichage (dont 1,8 Mo pour la vidéo du phénix). |
+| Relecture | Cartes qui se soulèvent au survol, séparateurs entre sections, reflet lent sur le titre, chiffres lisibles sans JavaScript, livrables (16:9, 9:16, sous-titres, HD) sur chaque page activité, FAQ en données structurées, tunnel utilisable au doigt et aux couleurs de la charte, corrections de titres (Sainte-Croix, Helios Spa, Introduction à Novazure). |
 | Référencement | Titre et description par page, image de partage (`public/og.jpg`), icône, `sitemap.xml`, `robots.txt`, données structurées (ProfessionalService). |
 | Accessibilité | Lien « Aller au contenu », titres hiérarchisés, focus doré visible, lecteur vidéo fermable au clavier (Échap), mouvement réduit respecté, liste de liens cachée pour la pellicule 3D. |
 
@@ -27,6 +28,10 @@ La branche d'origine (`ccr-a4b2a638-ugtgbi`) et son aperçu publié restent inta
 - **Textes** : courts et sobres, sans superlatifs (charte). Points forts et FAQ rédigés pour chaque activité : à relire.
 - **Couleurs** : l'or reste réservé aux éléments cliquables et aux petits titres.
 - **Tunnel de la page Réalisations** : la molette ne bloque plus la page ; une fois au bout du tunnel, la page défile.
+
+## Non fait
+
+- Score Lighthouse : l'outil n'a pas pu être lancé sur ce poste (refusé par les autorisations). Audit fait à la main : un seul h1 par page, descriptions et adresses canoniques présentes, aucune image sans texte alternatif, aucun bouton sans nom.
 
 ## À compléter avant la mise en ligne
 

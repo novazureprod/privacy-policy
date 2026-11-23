@@ -11,6 +11,14 @@ import { SITE } from "@/lib/site"
 
 type Props = { params: Promise<{ niche: string }> }
 
+// Ce que contient chaque livraison, quelle que soit l'activité.
+const DELIVERABLES = [
+  { tag: "16:9", title: "Film principal", text: "Pour votre site, YouTube et vos présentations." },
+  { tag: "9:16", title: "Formats verticaux", text: "Reels, TikTok et stories, prêts à publier." },
+  { tag: "CC", title: "Sous-titres", text: "Lisible sans le son, comme sur les réseaux." },
+  { tag: "HD", title: "Fichiers haute qualité", text: "Livrés en ligne, à garder et à réutiliser." },
+]
+
 // Les sept pages sont générées à l'avance ; une adresse inconnue attend le rendu (page 404).
 export const instant = false
 
@@ -131,6 +139,28 @@ export default async function NichePage({ params }: Props) {
                 <div className="glass lift flex h-full items-center gap-4 rounded-2xl p-6">
                   <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-[var(--nz-gold)]" />
                   <span className="text-sm">{o}</span>
+                </div>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="px-5 pb-8 sm:px-10" aria-labelledby="titre-livrables">
+        <Reveal className="text-center">
+          <p className="eyebrow">Livrables</p>
+          <h2 id="titre-livrables" className="metal-text mt-3 font-display text-3xl font-extrabold sm:text-4xl">
+            Ce que vous recevez
+          </h2>
+        </Reveal>
+        <ul className="mx-auto mt-12 grid max-w-5xl grid-cols-2 gap-4 lg:grid-cols-4">
+          {DELIVERABLES.map((d, i) => (
+            <li key={d.title}>
+              <Reveal delay={i * 90} className="h-full">
+                <div className="glass lift h-full rounded-2xl p-6 text-center">
+                  <p className="metal-text font-display text-2xl font-extrabold">{d.tag}</p>
+                  <p className="mt-2 font-display text-sm font-extrabold">{d.title}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-[var(--nz-muted)]">{d.text}</p>
                 </div>
               </Reveal>
             </li>

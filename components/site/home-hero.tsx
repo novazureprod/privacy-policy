@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from "react"
 import { Intro } from "./intro"
-import { Book3D } from "./book-3d"
 import { CALENDLY_URL } from "@/lib/niches"
 
 /** Accueil : fond de particules, intro du phénix, texte d'accueil, puis le livre portfolio. */
@@ -36,12 +35,6 @@ export function HomeHero() {
         </Intro>
       </div>
 
-      <div
-        className={`px-5 py-20 transition-opacity duration-1000 sm:px-10 ${ready ? "opacity-100" : "opacity-0"}`}
-      >
-        <p className="mb-10 text-center font-sub text-xs tracking-[0.3em] text-[var(--nz-muted)] uppercase">Nos réalisations</p>
-        <Book3D />
-      </div>
     </section>
   )
 }

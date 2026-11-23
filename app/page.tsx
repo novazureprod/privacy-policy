@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Header } from "@/components/site/header"
 import { HomeHero } from "@/components/site/home-hero"
+import { Book3D } from "@/components/site/book-3d"
 import { NICHES, CALENDLY_URL } from "@/lib/niches"
 import { NicheFolders } from "@/components/site/niche-folders"
 
@@ -30,6 +31,11 @@ export default function HomePage() {
     <main className="relative">
       <Header />
       <HomeHero />
+
+      <section className="px-5 py-24 sm:px-10">
+        <p className="mb-10 text-center font-sub text-xs tracking-[0.3em] text-[var(--nz-muted)] uppercase">Nos réalisations</p>
+        <Book3D />
+      </section>
 
       <section className="px-5 py-24 sm:px-10">
         <h2 className="metal-text text-center font-display text-3xl font-extrabold sm:text-4xl">Votre activité</h2>

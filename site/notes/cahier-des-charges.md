@@ -149,3 +149,9 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 - Chaque feuille : vidéo YouTube à droite, fiche (niche, titre, lien YouTube) à gauche. Pages tournées en 3D, clic, flèches, glissement.
 - Vidéos chargées seulement pour la page affichée et ses voisines.
 - À remplacer : titres et niches (« Vidéo 1 » à « Vidéo 4 »), à compléter jusqu'à vingt.
+
+## Livre : pages qui se déforment (v12)
+
+- Le livre est une section à part, juste après l'intro.
+- Pendant le tournage, la feuille se courbe comme du papier journal (inclinaison et compression alternées), puis se pose.
+- Tranche des pages visible, ombrage qui varie, reliure centrale.

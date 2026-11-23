@@ -59,7 +59,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, img: HTMLImageElement | null, 
   const yTop = band * 0.78
   const yBot = H - band * 0.78
   ctx.textAlign = "left"
-  ctx.fillText(`NOVAZURE 400   ${n}`, x0 + 8, yTop)
+  ctx.fillText(`${n}`, x0 + 8, yTop)
   ctx.textAlign = "right"
   ctx.fillText(`▸ ${n}A`, x0 + iw - 8, yTop)
   ctx.textAlign = "left"
@@ -93,7 +93,14 @@ function buildCamera(): THREE.Group {
   return g
 }
 
-export function mountFilmReel(container: HTMLElement, items: ReelItem[], onSelect: (item: ReelItem) => void) {
+// La bande reste immobile et ne défile qu'avec le défilement de la page : `track` est
+// l'élément haut que l'on fait défiler (le conteneur reste collé à l'écran pendant ce temps).
+export function mountFilmReel(
+  container: HTMLElement,
+  items: ReelItem[],
+  onSelect: (item: ReelItem) => void,
+  track: HTMLElement = container,
+) {
   const n = items.length
   const L = n * FRAME_L
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -103,7 +110,7 @@ export function mountFilmReel(container: HTMLElement, items: ReelItem[], onSelec
   renderer.outputColorSpace = THREE.SRGBColorSpace
   container.appendChild(renderer.domElement)
   renderer.domElement.style.cssText = "display:block;width:100%;height:100%"
-  renderer.domElement.style.touchAction = "pan-y"
+  renderer.domElement.style.touchAction = "auto"
 
   const scene = new THREE.Scene()
   const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 100)
@@ -224,19 +231,14 @@ export function mountFilmReel(container: HTMLElement, items: ReelItem[], onSelec
     cam.aspect = w / h
     vertical = cam.aspect < 0.85
     const t = Math.tan(((cam.fov * Math.PI) / 180) / 2)
-    pitch = FILM_H + (vertical ? 0.45 : 0.85)
+    pitch = FILM_H + (vertical ? 0.9 : 1.5)
     B = vertical ? 1.5 : 1.9
-    // Essais successifs : la largeur fixe la distance, la hauteur peut la repousser.
-    A = vertical ? 2.2 : 4.6
-    let dist = 10
-    for (let k = 0; k < 4; k++) {
-      buildPath()
-      const dW = (A * 2 * 0.78) / (2 * t * cam.aspect) // bande avant légèrement plus large que l'écran
-      const dH = (height + FILM_H + 0.6) / (2 * t)
-      dist = Math.max(dW, dH) + B
-      if (dH > dW) A = Math.min(A * 1.2, (dist - B) * t * cam.aspect * 1.3)
-    }
+    // La largeur seule fixe la distance : la bande avant déborde des deux bords, les
+    // vignettes restent grandes, et la spirale dépasse en haut et en bas de l'écran.
+    A = vertical ? 1.55 : 3.4
+    B = vertical ? 1.3 : 1.7
     buildPath()
+    const dist = (A * 2 * 0.8) / (2 * t * cam.aspect) + B
     rig.rotation.set(0.16, 0, vertical ? 0 : -0.05)
     cam.position.set(0, 0.35, dist)
     cam.lookAt(0, 0, 0)
@@ -248,14 +250,15 @@ export function mountFilmReel(container: HTMLElement, items: ReelItem[], onSelec
   ro.observe(container)
 
   let offset = 0
-  const speed = reduce ? 0 : 0.32 // unités par seconde
-  let target = speed
-  let dragging = false
-  let lastX = 0
-  let lastY = 0
-  let moved = 0
-  let fling = 0
   let hovered = -1
+  // Position de défilement de `track`, de 0 (début) à 1 (fin) : elle fait avancer la bande.
+  const progress = () => {
+    const r = track.getBoundingClientRect()
+    const run = r.height - window.innerHeight
+    const x = run > 40 ? -r.top / run : (window.innerHeight - r.top) / (window.innerHeight + r.height)
+    return Math.min(1, Math.max(0, x))
+  }
+  const travel = () => L - FRAME_L * 3 // toutes les vignettes passent devant
   const camWorld = new THREE.Vector3()
 
   const update = () => {
@@ -282,7 +285,7 @@ export function mountFilmReel(container: HTMLElement, items: ReelItem[], onSelec
       pointAt(s0 + FRAME_L / 2, p, nrm, tan)
       toCam.copy(camWorld).sub(p).normalize()
       const facing = nrm.dot(toCam)
-      const lum = facing > 0 ? 0.55 + 0.45 * facing : 0.28
+      const lum = facing > 0 ? 0.55 + 0.45 * facing : 0.16
       const hi = i === hovered ? 1.12 : 1
       f.mat.color.setScalar(Math.min(1, lum * hi))
       // Fondu aux deux bouts de la bande (hors champ), là où elle reboucle.
@@ -304,47 +307,30 @@ export function mountFilmReel(container: HTMLElement, items: ReelItem[], onSelec
   }
 
   const el = renderer.domElement
+  let downX = 0
+  let downY = 0
   const onDown = (e: PointerEvent) => {
-    dragging = true
-    moved = 0
-    lastX = e.clientX
-    lastY = e.clientY
-    fling = 0
+    downX = e.clientX
+    downY = e.clientY
   }
   const onMove = (e: PointerEvent) => {
-    if (dragging) {
-      const dx = e.clientX - lastX
-      const dy = e.clientY - lastY
-      if (e.pointerType === "touch" && Math.abs(dy) > Math.abs(dx)) return // laisse défiler la page
-      const d = -dx * 0.012
-      offset += d
-      fling = d * 60
-      moved += Math.abs(dx) + Math.abs(dy)
-      lastX = e.clientX
-      lastY = e.clientY
-      return
-    }
     hovered = pick(e)
-    el.style.cursor = hovered >= 0 ? "pointer" : "grab"
-    target = hovered >= 0 ? speed * 0.15 : speed
+    el.style.cursor = hovered >= 0 ? "pointer" : "default"
   }
   const onUp = (e: PointerEvent) => {
-    if (dragging && moved < 6) {
-      const i = pick(e)
-      if (i >= 0) onSelect(items[i])
-    }
-    dragging = false
+    if (Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY) > 8) return
+    const i = pick(e)
+    if (i >= 0) onSelect(items[i])
   }
   const onLeave = () => {
     hovered = -1
-    target = speed
   }
   el.addEventListener("pointerdown", onDown)
-  window.addEventListener("pointermove", onMove)
-  window.addEventListener("pointerup", onUp)
+  el.addEventListener("pointermove", onMove)
+  el.addEventListener("pointerup", onUp)
   el.addEventListener("pointerleave", onLeave)
 
-  let cur = speed
+  offset = progress() * travel()
   let last = performance.now()
   let raf = 0
   let visible = true
@@ -355,13 +341,11 @@ export function mountFilmReel(container: HTMLElement, items: ReelItem[], onSelec
     const dt = Math.min(0.05, (now - last) / 1000)
     last = now
     if (!visible) return
-    if (!dragging) {
-      cur += (target - cur) * Math.min(1, dt * 4)
-      offset += (cur + fling) * dt
-      fling *= Math.pow(0.05, dt)
-    }
-    camera3d.rotation.y = -0.65 + Math.sin(now / 4000) * 0.3
-    camera3d.rotation.x = Math.sin(now / 5200) * 0.08
+    // Suit le défilement en douceur ; sans défilement, rien ne bouge.
+    const goal = progress() * travel()
+    offset += (goal - offset) * (reduce ? 1 : Math.min(1, dt * 7))
+    camera3d.rotation.y = -0.65
+    camera3d.rotation.x = 0.04
     update()
     renderer.render(scene, cam)
   }
@@ -372,8 +356,8 @@ export function mountFilmReel(container: HTMLElement, items: ReelItem[], onSelec
     ro.disconnect()
     io.disconnect()
     el.removeEventListener("pointerdown", onDown)
-    window.removeEventListener("pointermove", onMove)
-    window.removeEventListener("pointerup", onUp)
+    el.removeEventListener("pointermove", onMove)
+    el.removeEventListener("pointerup", onUp)
     el.removeEventListener("pointerleave", onLeave)
     frames.forEach((f) => {
       f.geo.dispose()

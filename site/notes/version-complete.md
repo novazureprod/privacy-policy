@@ -13,6 +13,8 @@ La branche d'origine (`ccr-a4b2a638-ugtgbi`) et son aperçu publié restent inta
 | Réalisations | Tunnel 3D avec les vraies images des films, puis grille de tous les films avec filtre par activité et lecteur intégré. |
 | Pages légales | Mentions légales et politique de confidentialité (champs à compléter surlignés en or). Page 404. |
 | Pied de page | Navigation, activités, contact, YouTube, pages légales. |
+| Finitions | Bandeau des clients (noms tirés des films publiés), bouton « Rendez-vous » fixe sur téléphone, retour en haut, section active en or dans le menu, bouton « Passer l'intro », lecteur vidéo avec film précédent/suivant (flèches du clavier). |
+| Performance | Images des films en WebP (−40 %), polices de la charte préchargées. |
 | Référencement | Titre et description par page, image de partage (`public/og.jpg`), icône, `sitemap.xml`, `robots.txt`, données structurées (ProfessionalService). |
 | Accessibilité | Lien « Aller au contenu », titres hiérarchisés, focus doré visible, lecteur vidéo fermable au clavier (Échap), mouvement réduit respecté, liste de liens cachée pour la pellicule 3D. |
 
@@ -37,5 +39,5 @@ La branche d'origine (`ccr-a4b2a638-ugtgbi`) et son aperçu publié restent inta
 
 ## Aperçu
 
-`STATIC_EXPORT=1 npx next build` produit une copie statique dans `.next-export`,
-puis `python scripts/build-preview.py <dossier>` la rend autonome (chemins relatifs) pour l'aperçu publié.
+`python scripts/export-static.py <dossier>` construit la copie statique (`.next-export`), puis la rend
+autonome (chemins relatifs) pour l'aperçu publié. Le site lui-même se déploie normalement (`next build`).

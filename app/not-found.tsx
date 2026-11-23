@@ -1,6 +1,9 @@
 import Link from "next/link"
+import type { Metadata } from "next"
 import { Header } from "@/components/site/header"
 import { Footer } from "@/components/site/footer"
+
+export const metadata: Metadata = { title: "Page introuvable — Novazure" }
 
 export default function NotFound() {
   return (

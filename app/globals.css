@@ -204,3 +204,11 @@ html { scroll-behavior: smooth; scroll-padding-top: 80px; }
 .scroll-cue:hover, .scroll-cue:focus-visible { color: var(--nz-gold); }
 @keyframes cue-bob { 0%, 100% { transform: translateY(0); opacity: .6; } 50% { transform: translateY(6px); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .scroll-cue svg { animation: none; } }
+
+
+/* Bandeau des clients : défilement continu, fondu sur les bords */
+.marquee { -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+.marquee-row { animation: marquee 48s linear infinite; }
+.marquee:hover .marquee-row { animation-play-state: paused; }
+@keyframes marquee { to { transform: translateX(-100%); } }
+@media (prefers-reduced-motion: reduce) { .marquee { flex-wrap: wrap; justify-content: center; -webkit-mask-image: none; mask-image: none; } .marquee-row { animation: none; flex-wrap: wrap; justify-content: center; } .marquee-row[aria-hidden] { display: none; } }

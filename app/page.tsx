@@ -7,6 +7,7 @@ import { NicheFolders } from "@/components/site/niche-folders"
 import { VideoGrid } from "@/components/site/video-grid"
 import { Reveal } from "@/components/site/reveal"
 import { Counter } from "@/components/site/counter"
+import { ClientsMarquee } from "@/components/site/clients-marquee"
 import { NICHES } from "@/lib/niches"
 import { PORTFOLIO_VIDEOS } from "@/lib/portfolio"
 import { SITE } from "@/lib/site"
@@ -84,6 +85,8 @@ export default function HomePage() {
         </Reveal>
         <NicheFolders />
       </section>
+
+      <ClientsMarquee />
 
       <section className="px-5 py-20 sm:px-10" aria-label="Chiffres clés">
         <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-3">

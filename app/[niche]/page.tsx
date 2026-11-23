@@ -11,6 +11,9 @@ import { SITE } from "@/lib/site"
 
 type Props = { params: Promise<{ niche: string }> }
 
+// Les sept pages sont générées à l'avance ; une adresse inconnue attend le rendu (page 404).
+export const instant = false
+
 export function generateStaticParams() {
   return NICHES.map((n) => ({ niche: n.slug }))
 }

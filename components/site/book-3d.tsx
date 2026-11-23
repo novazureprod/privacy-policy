@@ -21,7 +21,7 @@ const SEG = 42 // découpage le long de la courbe (PC)
 const ROWS = 4 // découpage sur la hauteur (pour la bombe du papier)
 const TURN_MS = 1500
 // Tracé de chemins désactivé : il a besoin d'un fond pour le rendu, et le livre flotte désormais sans décor.
-const PT_ENABLED = true
+const PT_ENABLED = false
 const STAGGER_MS = 110
 
 // Pages : P0 titre (intérieur de couverture), P1 sommaire, puis info / vue pour chaque vidéo, P10 fin.
@@ -353,20 +353,6 @@ export function Book3D() {
       fill.position.set(2.5, 2, -1.5)
       scene.add(fill)
 
-      // Table : chêne noir laqué, reflet doux
-      const woodTex = new THREE.CanvasTexture(woodCanvas())
-      woodTex.colorSpace = THREE.SRGBColorSpace
-      woodTex.wrapS = woodTex.wrapT = THREE.RepeatWrapping
-      woodTex.repeat.set(1.4, 1.4)
-      const desk = new THREE.Mesh(
-        new THREE.PlaneGeometry(16, 16),
-        new THREE.MeshPhysicalMaterial({ map: woodTex, roughness: 0.32, clearcoat: 0.6, clearcoatRoughness: 0.25 }),
-      )
-      desk.rotation.x = -Math.PI / 2
-      desk.position.y = -0.04
-      desk.receiveShadow = true
-      scene.add(desk)
-
       // Planche de couverture et tranches des pages
       const leather = new THREE.MeshStandardMaterial({ color: 0x131d33, roughness: 0.7 })
       const board = new THREE.Mesh(new THREE.BoxGeometry(2 * PAGE_W + 0.14, 0.03, PAGE_H + 0.12), leather)
@@ -392,9 +378,24 @@ export function Book3D() {
       // Textures des faces
       const coverTex = new THREE.CanvasTexture(coverCanvas())
       coverTex.colorSpace = THREE.SRGBColorSpace
-      const leatherTex = new THREE.CanvasTexture(leatherCanvas())
-      leatherTex.colorSpace = THREE.SRGBColorSpace
-      const coverMat = new THREE.MeshPhysicalMaterial({ map: leatherTex, roughness: 0.62, sheen: 0.4, sheenRoughness: 0.5, clearcoat: 0.12 })
+      // Couverture : texture PBR réelle (couleur, normales, rugosité) de l'asset « binder notebook » 4K (CC0)
+      const texLoader = new THREE.TextureLoader()
+      const pbr = (f: string, srgb: boolean) => {
+        const t = texLoader.load(f)
+        if (srgb) t.colorSpace = THREE.SRGBColorSpace
+        t.wrapS = t.wrapT = THREE.RepeatWrapping
+        t.anisotropy = 8
+        return t
+      }
+      const coverMat = new THREE.MeshPhysicalMaterial({
+        map: pbr("/textures/binder/diffuse.jpg", true),
+        normalMap: pbr("/textures/binder/normal.jpg", false),
+        roughnessMap: pbr("/textures/binder/rough.jpg", false),
+        roughness: 1,
+        normalScale: new THREE.Vector2(0.6, 0.6),
+        clearcoat: 0.15,
+        clearcoatRoughness: 0.4,
+      })
 
       const paperBump = new THREE.CanvasTexture(bumpCanvas())
       paperBump.wrapS = paperBump.wrapT = THREE.RepeatWrapping

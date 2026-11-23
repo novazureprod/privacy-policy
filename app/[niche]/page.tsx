@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Header } from "@/components/site/header"
-import { Particles } from "@/components/site/particles"
 import { NICHES, getNiche, CALENDLY_URL } from "@/lib/niches"
 
 type Props = { params: Promise<{ niche: string }> }
@@ -26,7 +25,6 @@ export default async function NichePage({ params }: Props) {
       <Header current={n.slug} />
 
       <section className="relative flex min-h-[80svh] flex-col items-center justify-center overflow-hidden px-6 pt-28 pb-20 text-center">
-        <Particles />
         <div className="relative z-10 max-w-2xl">
           <p className="font-sub text-xs tracking-[0.35em] text-[var(--nz-gold)] uppercase">{n.label}</p>
           <h1 className="metal-text mt-4 font-display text-4xl leading-tight font-extrabold sm:text-6xl">{n.headline}</h1>

@@ -28,7 +28,7 @@ export function Intro({ onDone, children }: { onDone?: () => void; children?: Re
   }, [])
 
   return (
-    <div className="relative flex h-[100svh] w-full items-center justify-center overflow-hidden bg-[var(--nz-black)]">
+    <div className="relative flex h-[100svh] w-full items-center justify-center overflow-hidden ">
       {!done && (
         <video
           ref={videoRef}

@@ -136,3 +136,9 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 - Alignés sur la vidéo de référence (composant glass-folder-cards) : dossiers clairs et sombres alternés, ouverture au clic, fichiers qui sortent du dossier, menu ··· (découvrir la niche, prendre rendez-vous).
 - Chaque fichier du dossier ouvre la page de la niche.
 - Sous-ligne : compteur de fichiers, pour ne pas passer sous le bouton ···.
+
+## Fond dynamique commun (v10)
+
+- Fond unique pour toutes les pages : nappes bleues et dorées qui dérivent lentement, trame de points, particules lumineuses.
+- Calque fixe derrière le contenu (`components/site/ambient-background.tsx`). Le fond du `body` est devenu transparent, sinon il masquait le calque.
+- Mouvement désactivé si l'utilisateur préfère moins d'animations.

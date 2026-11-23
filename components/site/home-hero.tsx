@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from "react"
 import { Intro } from "./intro"
-import { Particles } from "./particles"
 import { Book3D } from "./book-3d"
 import { CALENDLY_URL } from "@/lib/niches"
 
@@ -14,7 +13,6 @@ export function HomeHero() {
   return (
     <section className="relative w-full">
       <div className="relative min-h-[100svh] overflow-hidden">
-        <Particles />
         <Intro onDone={onDone}>
           <div
             className={`absolute inset-x-0 top-1/2 bottom-0 z-10 flex flex-col items-center justify-start px-6 pt-4 text-center transition-all duration-[1400ms] ease-out ${

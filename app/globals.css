@@ -48,9 +48,13 @@
   --font-sans: var(--font-body);
 }
 
-html,
-body {
+html {
   background: var(--nz-black);
+  color: var(--nz-text);
+  font-family: var(--font-body);
+}
+body {
+  background: transparent;
   color: var(--nz-text);
   font-family: var(--font-body);
 }
@@ -91,3 +95,32 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Fond dynamique commun à toutes les pages */
+.ambient-blob {
+  position: absolute;
+  width: 62vmax;
+  height: 62vmax;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: .32;
+  will-change: transform;
+}
+.ambient-blob--blue { background: radial-gradient(circle, #3b82f6 0%, rgba(30,58,138,0) 65%); left: -18vmax; top: -22vmax; animation: ambient-drift-a 28s ease-in-out infinite alternate; }
+.ambient-blob--gold { background: radial-gradient(circle, #c9a227 0%, rgba(201,162,39,0) 62%); right: -20vmax; bottom: -24vmax; opacity: .18; animation: ambient-drift-b 34s ease-in-out infinite alternate; }
+.ambient-blob--steel { background: radial-gradient(circle, #5b7db1 0%, rgba(27,37,53,0) 65%); left: 30vw; top: 35vh; opacity: .22; animation: ambient-drift-c 40s ease-in-out infinite alternate; }
+@keyframes ambient-drift-a { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(18vw, 14vh) scale(1.15); } }
+@keyframes ambient-drift-b { 0% { transform: translate(0,0) scale(1.05); } 100% { transform: translate(-16vw, -12vh) scale(.95); } }
+@keyframes ambient-drift-c { 0% { transform: translate(0,0); } 100% { transform: translate(-14vw, 10vh) scale(1.1); } }
+.ambient-dots {
+  position: absolute;
+  inset: 0;
+  opacity: .12;
+  background-image: radial-gradient(rgba(147,197,253,.9) 1px, transparent 1.4px);
+  background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 45%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 45%, #000 40%, transparent 100%);
+  animation: ambient-dots-drift 60s linear infinite;
+}
+@keyframes ambient-dots-drift { to { background-position: 260px 130px; } }
+@media (prefers-reduced-motion: reduce) { .ambient-blob, .ambient-dots { animation: none !important; } }

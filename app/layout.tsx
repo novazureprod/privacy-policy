@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import "./globals.css"
+import { AmbientBackground } from "@/components/site/ambient-background"
 
 export const metadata: Metadata = {
   title: "Novazure — vidéaste",
@@ -9,7 +10,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr" className="dark">
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="relative min-h-screen antialiased">
+        <AmbientBackground />
+        {children}
+      </body>
     </html>
   )
 }

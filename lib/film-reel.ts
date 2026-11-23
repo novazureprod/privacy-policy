@@ -150,6 +150,56 @@ function buildLogo(url: string): THREE.Group {
       }
     }
 
+    // 4. Parties dorées du phénix (bec, crête, serres, liserés des plumes) : ce sont de
+    //    petites zones dorées, séparées du cercle par un trait sombre, collées à l'oiseau.
+    //    On les rattache entières au phénix pour que la tête et le bec restent d'un bloc.
+    const isGold = (i: number) => {
+      const r = data[i * 4]
+      const gg = data[i * 4 + 1]
+      const b = data[i * 4 + 2]
+      return data[i * 4 + 3] > 40 && r > 90 && r > b + 35 && gg > b + 10
+    }
+    const near = dilate(grown, 18) // voisinage immédiat du corps bleu
+    // Seconde passe : les mèches de la crête, à quelques pixels des pièces déjà rattachées.
+    for (let pass = 0; pass < 2; pass++) {
+      const reach = pass === 0 ? phoenix : dilate(phoenix, 6)
+      const label = new Uint8Array(w * h)
+      for (let i = 0; i < w * h; i++) {
+        if (label[i] || phoenix[i] || !isGold(i)) continue
+        const region: number[] = []
+        let touches = false
+        const st = [i]
+        label[i] = 1
+        while (st.length) {
+          const k = st.pop()!
+          region.push(k)
+          const x = k % w
+          const y = (k / w) | 0
+          const nb = [x > 0 ? k - 1 : -1, x < w - 1 ? k + 1 : -1, y > 0 ? k - w : -1, y < h - 1 ? k + w : -1]
+          for (const q of nb) {
+            if (q < 0) continue
+            if (reach[q] && !phoenix[k]) touches = true
+            if (!phoenix[q] && !label[q] && isGold(q)) {
+              label[q] = 1
+              st.push(q)
+            }
+          }
+        }
+        // Petites pièces (bec, crête, serres) : toujours à l'oiseau. Une pièce du cercle peut
+        // le toucher mais s'étend loin de lui : on ne garde que les zones collées au corps bleu.
+        let close = 0
+        for (const k of region) close += near[k]
+        const small = region.length < (pass === 0 ? 1800 : 800)
+        const hugging = pass === 0 && region.length < 9000 && close / region.length > 0.8
+        if (touches && (small || hugging)) for (const k of region) phoenix[k] = 1
+      }
+    }
+    // Récupère le trait sombre qui entoure ces parties dorées.
+    const outline = dilate(phoenix, 2)
+    for (let i = 0; i < w * h; i++) {
+      if (outline[i] && !phoenix[i] && !isGold(i) && data[i * 4 + 3] > 40) phoenix[i] = 1
+    }
+
     const layer = (keep: (i: number) => boolean) => {
       const c = document.createElement("canvas")
       c.width = w

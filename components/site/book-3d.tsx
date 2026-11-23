@@ -21,7 +21,7 @@ const SEG = 42 // découpage le long de la courbe (PC)
 const ROWS = 4 // découpage sur la hauteur (pour la bombe du papier)
 const TURN_MS = 1500
 // Tracé de chemins désactivé : il a besoin d'un fond pour le rendu, et le livre flotte désormais sans décor.
-const PT_ENABLED = false
+const PT_ENABLED = true
 const STAGGER_MS = 110
 
 // Pages : P0 titre (intérieur de couverture), P1 sommaire, puis info / vue pour chaque vidéo, P10 fin.
@@ -216,6 +216,24 @@ function coverCanvas(): HTMLCanvasElement {
   return c
 }
 
+function leatherCanvas(): HTMLCanvasElement {
+  const S = 1024
+  const c = document.createElement("canvas")
+  c.width = S
+  c.height = S
+  const ctx = c.getContext("2d")!
+  ctx.fillStyle = "#17171a"
+  ctx.fillRect(0, 0, S, S)
+  makeNoise(ctx, S, S, 40, 31)
+  ctx.globalAlpha = 0.08
+  for (let i = 0; i < 2500; i++) {
+    ctx.fillStyle = Math.random() < 0.5 ? "#000" : "#3a3a40"
+    ctx.fillRect(Math.random() * S, Math.random() * S, 2, 2)
+  }
+  ctx.globalAlpha = 1
+  return c
+}
+
 function woodCanvas(): HTMLCanvasElement {
   const S = 1024
   const c = document.createElement("canvas")
@@ -315,11 +333,11 @@ export function Book3D() {
 
       const scene = new THREE.Scene()
       // scene.environment = scene_env
-      scene.environmentIntensity = 0.45
+      scene.environmentIntensity = 0.25
       const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 50)
 
       // Lumière : une lampe au-dessus à gauche, une lumière de remplissage douce
-      const key = new THREE.DirectionalLight(0xfff0d8, 2.4)
+      const key = new THREE.DirectionalLight(0xffe2b0, 3.2)
       key.position.set(-2.4, 4.2, 2.6)
       key.castShadow = true
       key.shadow.mapSize.set(2048, 2048)
@@ -334,6 +352,20 @@ export function Book3D() {
       const fill = new THREE.DirectionalLight(0x9db8ff, 0.5)
       fill.position.set(2.5, 2, -1.5)
       scene.add(fill)
+
+      // Table : chêne noir laqué, reflet doux
+      const woodTex = new THREE.CanvasTexture(woodCanvas())
+      woodTex.colorSpace = THREE.SRGBColorSpace
+      woodTex.wrapS = woodTex.wrapT = THREE.RepeatWrapping
+      woodTex.repeat.set(1.4, 1.4)
+      const desk = new THREE.Mesh(
+        new THREE.PlaneGeometry(16, 16),
+        new THREE.MeshPhysicalMaterial({ map: woodTex, roughness: 0.32, clearcoat: 0.6, clearcoatRoughness: 0.25 }),
+      )
+      desk.rotation.x = -Math.PI / 2
+      desk.position.y = -0.04
+      desk.receiveShadow = true
+      scene.add(desk)
 
       // Planche de couverture et tranches des pages
       const leather = new THREE.MeshStandardMaterial({ color: 0x131d33, roughness: 0.7 })
@@ -360,7 +392,9 @@ export function Book3D() {
       // Textures des faces
       const coverTex = new THREE.CanvasTexture(coverCanvas())
       coverTex.colorSpace = THREE.SRGBColorSpace
-      const coverMat = new THREE.MeshStandardMaterial({ map: coverTex, roughness: 0.5, metalness: 0.05 })
+      const leatherTex = new THREE.CanvasTexture(leatherCanvas())
+      leatherTex.colorSpace = THREE.SRGBColorSpace
+      const coverMat = new THREE.MeshPhysicalMaterial({ map: leatherTex, roughness: 0.62, sheen: 0.4, sheenRoughness: 0.5, clearcoat: 0.12 })
 
       const paperBump = new THREE.CanvasTexture(bumpCanvas())
       paperBump.wrapS = paperBump.wrapT = THREE.RepeatWrapping

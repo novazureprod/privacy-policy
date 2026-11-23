@@ -248,7 +248,7 @@ export default function PerspectiveTunnelHero({
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.16)_0%,transparent_72%)]" />
 
             {/* Depth Ring Guides */}
-            <div className="pointer-events-none absolute h-[48vmin] w-[48vmin] rounded-full border border-[rgba(201,162,39,0.18)]" />
+            <div className="pointer-events-none absolute h-[48vmin] w-[48vmin] rounded-full border border-[rgba(92,184,255,0.18)]" />
             <div className="pointer-events-none absolute h-[76vmin] w-[76vmin] rounded-full border border-dashed border-[rgba(147,197,253,0.12)]" />
 
             {/* Central Anchor Typography */}

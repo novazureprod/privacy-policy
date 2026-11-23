@@ -16,7 +16,7 @@ SRC = Path(".next-export")
 OUT = Path(sys.argv[1])
 
 PAGES = [p.stem for p in SRC.glob("*.html")]
-ASSET_DIRS = ["films", "fonts", "intro"]
+ASSET_DIRS = ["films", "fonts", "intro", "logo"]
 ASSET_FILES = ["icon.png", "og.jpg"]
 
 NAV_SCRIPT = """<script>

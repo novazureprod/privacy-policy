@@ -53,7 +53,7 @@ export function Particles() {
           if (p.x < -4) p.x = w + 4
           if (p.x > w + 4) p.x = -4
         }
-        const color = p.gold ? "201, 162, 39" : "147, 197, 253"
+        const color = p.gold ? "92,184,255" : "147, 197, 253"
         const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4)
         g.addColorStop(0, `rgba(${color}, ${p.a})`)
         g.addColorStop(1, `rgba(${color}, 0)`)

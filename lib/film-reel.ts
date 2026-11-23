@@ -52,19 +52,9 @@ function drawFrame(ctx: CanvasRenderingContext2D, img: HTMLImageElement | null, 
       ctx.fill()
     }
   }
-  // Marquages orange, comme sur une vraie pellicule
-  ctx.fillStyle = "#f08a24"
-  ctx.textBaseline = "middle"
-  ctx.font = `700 ${Math.round(band * 0.36)}px "Open Sans", Arial, sans-serif`
-  const yTop = band * 0.78
-  const yBot = H - band * 0.78
-  ctx.textAlign = "left"
-  ctx.fillText(`${n}`, x0 + 8, yTop)
-  ctx.textAlign = "right"
-  ctx.fillText(`▸ ${n}A`, x0 + iw - 8, yTop)
-  ctx.textAlign = "left"
-  const label = title.toUpperCase()
-  ctx.fillText(`${n}  ▸  ${label.length > 38 ? label.slice(0, 37) + "…" : label}`, x0 + 8, yBot)
+  // Pellicule épurée : pas de marquage texte sur la bande (numéros et titres retirés).
+  void n
+  void title
 }
 
 // Le mot « PORTFOLIO » en relief au centre de la spirale, dans la charte Novazure :
@@ -127,7 +117,7 @@ export function mountFilmReel(
   items: ReelItem[],
   onSelect: (item: ReelItem) => void,
   track: HTMLElement = container,
-  centerText = "PORTFOLIO",
+  centerText = "",
 ) {
   const n = items.length
   const L = n * FRAME_L
@@ -152,7 +142,7 @@ export function mountFilmReel(
 
   const rig = new THREE.Group() // incline l'ensemble pour la perspective
   scene.add(rig)
-  const title3d = buildTitle(centerText)
+  const title3d = centerText ? buildTitle(centerText) : new THREE.Group()
   rig.add(title3d)
 
   // Spirale elliptique autour d'un axe vertical : devant l'appareil, la bande file à

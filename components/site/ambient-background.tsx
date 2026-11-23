@@ -8,9 +8,6 @@ export function AmbientBackground() {
   return (
     <div aria-hidden="true" className="ambient pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       <div className="ambient-blob ambient-blob--blue" />
-      <div className="ambient-blob ambient-blob--gold" />
-      <div className="ambient-blob ambient-blob--steel" />
-      <div className="ambient-dots" />
       <Particles />
     </div>
   )

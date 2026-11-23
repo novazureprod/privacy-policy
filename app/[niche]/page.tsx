@@ -71,7 +71,7 @@ export default async function NichePage({ params }: Props) {
               href={SITE.calendly}
               target="_blank"
               rel="noopener"
-              className="glass glass-gold rounded-full px-9 py-3.5 font-sub text-xs tracking-[0.2em] text-[var(--nz-gold)] uppercase"
+              className="btn-accent rounded-full px-9 py-3.5 font-sub text-xs tracking-[0.2em] uppercase"
             >
               Prendre rendez-vous
             </a>
@@ -198,7 +198,7 @@ export default async function NichePage({ params }: Props) {
               href={SITE.calendly}
               target="_blank"
               rel="noopener"
-              className="glass glass-gold mt-8 inline-block rounded-full px-10 py-4 font-sub text-xs tracking-[0.2em] text-[var(--nz-gold)] uppercase"
+              className="btn-accent mt-8 rounded-full px-10 py-4 font-sub text-xs tracking-[0.2em] uppercase"
             >
               Prendre rendez-vous
             </a>

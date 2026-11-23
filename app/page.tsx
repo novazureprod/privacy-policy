@@ -69,9 +69,6 @@ export default function HomePage() {
           <h2 id="titre-realisations" className="metal-text mt-3 font-display text-3xl font-extrabold sm:text-5xl">
             Faites défiler la pellicule.
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-sm text-[var(--nz-muted)]">
-            Chaque image est un film. Cliquez pour le regarder.
-          </p>
         </Reveal>
         <VideoGallery />
         <div className="px-5 pb-8 text-center">
@@ -97,11 +94,9 @@ export default function HomePage() {
       <ClientsMarquee />
 
       <section className="px-5 py-20 sm:px-10" aria-label="Chiffres clés">
-        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-3">
+        <div className="mx-auto grid max-w-xs grid-cols-1 gap-6">
           {[
-            { n: PORTFOLIO_VIDEOS.length, s: "", l: "films en ligne" },
             { n: NICHES.length, s: "", l: "secteurs accompagnés" },
-            { n: 1, s: "", l: "interlocuteur, du tournage au montage" },
           ].map((s, i) => (
             <Reveal key={s.l} delay={i * 120}>
               <div className="glass lift rounded-2xl p-8 text-center">
@@ -230,7 +225,7 @@ export default function HomePage() {
                 href={SITE.calendly}
                 target="_blank"
                 rel="noopener"
-                className="glass glass-gold rounded-full px-10 py-4 font-sub text-xs tracking-[0.2em] text-[var(--nz-gold)] uppercase"
+                className="btn-accent rounded-full px-10 py-4 font-sub text-xs tracking-[0.2em] uppercase"
               >
                 Prendre rendez-vous
               </a>

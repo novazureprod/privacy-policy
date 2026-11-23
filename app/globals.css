@@ -197,3 +197,10 @@ html { scroll-behavior: smooth; scroll-padding-top: 80px; }
 .legal h2 { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; margin-top: 2rem; color: var(--nz-text); }
 .legal h2:first-child { margin-top: 0; }
 .legal p { margin-top: .6rem; line-height: 1.7; color: var(--nz-muted); }
+
+
+/* Invitation à défiler, sous le texte d'accueil */
+.scroll-cue svg { animation: cue-bob 2.2s ease-in-out infinite; }
+.scroll-cue:hover, .scroll-cue:focus-visible { color: var(--nz-gold); }
+@keyframes cue-bob { 0%, 100% { transform: translateY(0); opacity: .6; } 50% { transform: translateY(6px); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .scroll-cue svg { animation: none; } }

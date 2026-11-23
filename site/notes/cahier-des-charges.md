@@ -155,3 +155,12 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 - Le livre est une section à part, juste après l'intro.
 - Pendant le tournage, la feuille se courbe comme du papier journal (inclinaison et compression alternées), puis se pose.
 - Tranche des pages visible, ombrage qui varie, reliure centrale.
+
+## Livre en 3D réelle (v13)
+
+- Scène Three.js : double page sur table en bois, tranche des feuilles, reliure, ombres portées.
+- Pages déformables : pendant le tournage, le papier se courbe et ondule, avec une bombe au centre.
+- Textures générées : papier avec fibres, cuir de couverture, bois de table.
+- Clic sur la page de droite : page suivante, ou ouverture de la vidéo sur les pages vidéo (fenêtre YouTube).
+- Miniatures YouTube chargées depuis i.ytimg.com (non vérifiable depuis l'environnement de travail) ; un dégradé reste affiché si elles ne se chargent pas.
+- Dépendance ajoutée : three (et @types/three).

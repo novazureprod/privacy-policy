@@ -6,7 +6,7 @@ export type PortfolioVideo = {
 }
 
 export const PORTFOLIO_VIDEOS: PortfolioVideo[] = [
-  { youtubeId: "rBkvInnpaS8", title: "Vidéo 1" },
+  { youtubeId: "rBkvInnpaS8", title: "Les 2 Sœurs — Cuisine", niche: "Restaurant" },
   { youtubeId: "OV3lPHHe0ZU", title: "Vidéo 2" },
   { youtubeId: "1dzJABebjl0", title: "Vidéo 3" },
   { youtubeId: "WQEPIkpcCCM", title: "Vidéo 4" },

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { mountFilmReel, type ReelItem } from "@/lib/film-reel"
+import type { ReelItem } from "@/lib/film-reel"
 import { PORTFOLIO_VIDEOS } from "@/lib/portfolio"
 
 // Une image par vidéo, au format paysage, dans public/films (miniatures Novazure ou captures).
@@ -15,13 +15,35 @@ export function VideoGallery() {
   const ref = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    if (!ref.current || !trackRef.current) return
-    return mountFilmReel(
-      ref.current,
-      items,
-      (it) => window.open(`https://www.youtube.com/watch?v=${it.id}`, "_blank", "noopener"),
-      trackRef.current,
+    const el = ref.current
+    const track = trackRef.current
+    if (!el || !track) return
+    // La scène 3D, three.js et les 26 images ne se chargent qu'à l'approche de la section :
+    // l'accueil s'affiche plus vite.
+    let stop: (() => void) | undefined
+    let unmounted = false
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return
+        io.disconnect()
+        import("@/lib/film-reel").then(({ mountFilmReel }) => {
+          if (unmounted) return
+          stop = mountFilmReel(
+            el,
+            items,
+            (it) => window.open(`https://www.youtube.com/watch?v=${it.id}`, "_blank", "noopener"),
+            track,
+          )
+        })
+      },
+      { rootMargin: "0px 0px 15% 0px" },
     )
+    io.observe(track)
+    return () => {
+      unmounted = true
+      io.disconnect()
+      stop?.()
+    }
   }, [])
   // Zone haute : la pellicule reste collée à l'écran et défile au rythme de la molette.
   return (

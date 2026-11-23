@@ -49,9 +49,17 @@ export default function HomePage() {
     knowsAbout: NICHES.map((n) => n.label),
   }
 
+  // Questions fréquentes en données structurées : elles peuvent apparaître dans les résultats Google.
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+  }
+
   return (
     <main className="relative">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <Header />
       <HomeHero />
 

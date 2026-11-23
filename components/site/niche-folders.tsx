@@ -20,7 +20,7 @@ export function NicheFolders() {
   const router = useRouter()
 
   return (
-    <div className="mx-auto mt-14 grid max-w-6xl grid-cols-1 justify-items-center gap-x-10 gap-y-14 md:grid-cols-2 xl:grid-cols-3">
+    <div className="mx-auto mt-14 grid max-w-6xl grid-cols-1 justify-items-center gap-x-10 gap-y-8 sm:gap-y-14 md:grid-cols-2 xl:grid-cols-3">
       {NICHES.map((n, i) => {
         const menu: FolderMenuItem[] = [
           { label: `Découvrir ${n.label.toLowerCase()}`, onSelect: () => router.push(`/${n.slug}`) },

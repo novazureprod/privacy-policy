@@ -124,7 +124,7 @@ function TunnelCard({ card, progress, pointer, total, stage }: TunnelCardProps) 
             }}
             className="pointer-events-auto absolute left-1/2 top-1/2 aspect-[4/5] will-change-transform select-none cursor-pointer"
         >
-            <div className="group relative h-full w-full overflow-hidden rounded-2xl bg-neutral-200 dark:bg-neutral-900 shadow-2xl shadow-neutral-950/20 dark:shadow-black/90 ring-1 ring-black/10 dark:ring-white/15 transition-all duration-500 hover:ring-indigo-500/70 dark:hover:ring-indigo-400/70 hover:shadow-indigo-500/25">
+            <div className="group relative h-full w-full overflow-hidden rounded-2xl bg-[var(--nz-night)] shadow-2xl shadow-black/90 ring-1 ring-[rgba(147,197,253,0.22)] transition-all duration-500 hover:ring-[var(--nz-gold)]">
                 <img
                     src={card.item.src}
                     alt={card.item.title}
@@ -132,7 +132,7 @@ function TunnelCard({ card, progress, pointer, total, stage }: TunnelCardProps) 
                     className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent flex items-end p-4 sm:p-5">
-                    <span className="text-xs sm:text-sm font-mono tracking-widest uppercase text-white/95 drop-shadow-md">
+                    <span className="font-display text-xs font-extrabold leading-snug text-white/95 drop-shadow-md sm:text-sm">
                         {card.item.title}
                     </span>
                 </div>
@@ -203,14 +203,35 @@ export default function PerspectiveTunnelHero({
             rawProgress.set(next);
         };
 
+        // Au doigt : même principe, le glissement vertical fait avancer le tunnel.
+        let lastY: number | null = null;
+        const onTouchStart = (e: TouchEvent) => {
+            lastY = e.touches[0]?.clientY ?? null;
+        };
+        const onTouchMove = (e: TouchEvent) => {
+            const y = e.touches[0]?.clientY;
+            if (lastY === null || y === undefined) return;
+            const dy = lastY - y;
+            const current = rawProgress.get();
+            if ((dy > 0 && current >= 1) || (dy < 0 && current <= 0)) return;
+            e.preventDefault();
+            rawProgress.set(Math.min(1, Math.max(0, current + dy * 0.0025)));
+            lastY = y;
+        };
         el.addEventListener("wheel", handleWheel, { passive: false });
-        return () => el.removeEventListener("wheel", handleWheel);
+        el.addEventListener("touchstart", onTouchStart, { passive: true });
+        el.addEventListener("touchmove", onTouchMove, { passive: false });
+        return () => {
+            el.removeEventListener("wheel", handleWheel);
+            el.removeEventListener("touchstart", onTouchStart);
+            el.removeEventListener("touchmove", onTouchMove);
+        };
     }, [rawProgress]);
 
     const pointer = useCameraParallax(!reduce);
 
-    const titleScale = useTransform(smoothProgress, [0, 0.5, 1], [0.7, 1, 1.35]);
-    const titleOpacity = useTransform(smoothProgress, [0, 0.12, 0.85, 1], [0.25, 1, 1, 0]);
+    const titleScale = useTransform(smoothProgress, [0, 0.5, 1], [0.9, 1.05, 1.35]);
+    const titleOpacity = useTransform(smoothProgress, [0, 0.85, 1], [1, 1, 0]);
     const promptOpacity = useTransform(smoothProgress, [0, 0.12], [1, 0]);
 
     return (
@@ -223,12 +244,12 @@ export default function PerspectiveTunnelHero({
             }}
         >
             {/* Immersive Background Grid & Glow */}
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#1e1b4b_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,#000_60%,transparent_100%)] opacity-70 dark:opacity-65" />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.15)_0%,transparent_70%)] dark:bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.2)_0%,transparent_75%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(147,197,253,0.35)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,#000_60%,transparent_100%)] opacity-70 dark:opacity-65" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.16)_0%,transparent_72%)]" />
 
             {/* Depth Ring Guides */}
-            <div className="pointer-events-none absolute h-[48vmin] w-[48vmin] rounded-full border border-indigo-500/15 dark:border-indigo-400/10" />
-            <div className="pointer-events-none absolute h-[76vmin] w-[76vmin] rounded-full border border-dashed border-neutral-300/60 dark:border-white/10" />
+            <div className="pointer-events-none absolute h-[48vmin] w-[48vmin] rounded-full border border-[rgba(201,162,39,0.18)]" />
+            <div className="pointer-events-none absolute h-[76vmin] w-[76vmin] rounded-full border border-dashed border-[rgba(147,197,253,0.12)]" />
 
             {/* Central Anchor Typography */}
             <motion.div

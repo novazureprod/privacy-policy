@@ -46,6 +46,15 @@
 
 @theme inline {
   --font-sans: var(--font-body);
+  /* Couleurs shadcn, reliées à la charte Novazure */
+  --color-background: var(--nz-black);
+  --color-foreground: var(--nz-text);
+  --color-card: var(--nz-night);
+  --color-card-foreground: var(--nz-text);
+  --color-muted-foreground: var(--nz-muted);
+  --color-border: var(--edge);
+  --color-primary: var(--nz-blue-500);
+  --color-primary-foreground: var(--nz-text);
 }
 
 html {

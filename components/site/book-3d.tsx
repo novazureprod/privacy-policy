@@ -17,8 +17,8 @@ import type * as T from "three"
 
 const PAGE_W = 1
 const PAGE_H = 0.72
-const SEG = 30 // découpage le long de la courbe
-const ROWS = 3 // découpage sur la hauteur (pour la bombe du papier)
+const SEG = 42 // découpage le long de la courbe (PC)
+const ROWS = 4 // découpage sur la hauteur (pour la bombe du papier)
 const TURN_MS = 1500
 const STAGGER_MS = 110
 
@@ -235,6 +235,29 @@ function woodCanvas(): HTMLCanvasElement {
   return c
 }
 
+function bumpCanvas(): HTMLCanvasElement {
+  const S = 512
+  const c = document.createElement("canvas")
+  c.width = S
+  c.height = S
+  const ctx = c.getContext("2d")!
+  ctx.fillStyle = "#808080"
+  ctx.fillRect(0, 0, S, S)
+  makeNoise(ctx, S, S, 60, 21)
+  ctx.globalAlpha = 0.25
+  for (let i = 0; i < 400; i++) {
+    ctx.strokeStyle = Math.random() < 0.5 ? "#a0a0a0" : "#606060"
+    ctx.beginPath()
+    const x = Math.random() * S
+    const y = Math.random() * S
+    ctx.moveTo(x, y)
+    ctx.lineTo(x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 3)
+    ctx.stroke()
+  }
+  ctx.globalAlpha = 1
+  return c
+}
+
 function edgeCanvas(): HTMLCanvasElement {
   const c = document.createElement("canvas")
   c.width = 256
@@ -339,8 +362,11 @@ export function Book3D() {
       // Textures des faces
       const coverTex = new THREE.CanvasTexture(coverCanvas())
       coverTex.colorSpace = THREE.SRGBColorSpace
-      const coverMat = new THREE.MeshStandardMaterial({ map: coverTex, roughness: 0.6 })
+      const coverMat = new THREE.MeshStandardMaterial({ map: coverTex, roughness: 0.5, metalness: 0.05 })
 
+      const paperBump = new THREE.CanvasTexture(bumpCanvas())
+      paperBump.wrapS = paperBump.wrapT = THREE.RepeatWrapping
+      paperBump.repeat.set(1.5, 1.5)
       const thumbImgs: (HTMLImageElement | null)[] = PORTFOLIO_VIDEOS.map(() => null)
       const faceTex: T.CanvasTexture[] = []
       const repaint = (idx: number) => {
@@ -385,6 +411,7 @@ export function Book3D() {
         t0: number
         delay: number
         moving: boolean
+        dragging: boolean
       }
       const nSeg = SEG + 1
       const nRow = ROWS + 1
@@ -434,13 +461,13 @@ export function Book3D() {
         geo.setAttribute("normal", norAttr)
         geo.setAttribute("uv", new THREE.BufferAttribute(uv, 2))
 
-        const frontMat = j === 0 ? coverMat : new THREE.MeshStandardMaterial({ map: faceTex[2 * j - 1] ?? null, roughness: 0.92, metalness: 0 })
-        const backMat = new THREE.MeshStandardMaterial({ map: faceTex[2 * j] ?? null, roughness: 0.92, metalness: 0 })
+        const frontMat = j === 0 ? coverMat : new THREE.MeshStandardMaterial({ map: faceTex[2 * j - 1] ?? null, bumpMap: paperBump, bumpScale: 0.6, roughness: 0.88, metalness: 0 })
+        const backMat = new THREE.MeshStandardMaterial({ map: faceTex[2 * j] ?? null, bumpMap: paperBump, bumpScale: 0.6, roughness: 0.88, metalness: 0 })
         const mesh = new THREE.Mesh(geo, [frontMat, backMat])
         mesh.castShadow = true
         mesh.receiveShadow = true
         scene.add(mesh)
-        leaves.push({ j, mesh, pos: posAttr, nor: norAttr, theta: 0, from: 0, to: 0, t0: 0, delay: 0, moving: false })
+        leaves.push({ j, mesh, pos: posAttr, nor: norAttr, theta: 0, from: 0, to: 0, t0: 0, delay: 0, moving: false, dragging: false })
       }
 
       // Pages : tranche et textures liées (mise à jour quand la texture change)
@@ -449,7 +476,7 @@ export function Book3D() {
       const tmpY = new Float64Array(nSeg)
       const tmpPhi = new Float64Array(nSeg)
       function shapeLeaf(leaf: Leaf, theta: number, layerY: number) {
-        const flex = 0.3 * Math.sin(theta)
+        const flex = leaf.j === 0 ? 0 : 0.34 * Math.sin(theta) // couverture rigide, papier souple
         const ds = PAGE_W / SEG
         let x = 0, y = 0
         for (let i = 0; i < nSeg; i++) {
@@ -471,7 +498,8 @@ export function Book3D() {
             const cup = cupAmt * Math.sin(Math.PI * v)
             const a = idx(i, k)
             const px = tmpX[i]
-            const py = tmpY[i] + layerY + cup
+            const dip = leaf.j === 0 ? 0 : -0.012 * Math.exp(-Math.pow(tmpX[i] / 0.1, 2)) // creux de reliure
+            const py = tmpY[i] + layerY + cup + dip
             const pz = (v - 0.5) * PAGE_H
             leaf.pos.setXYZ(a, px, py, pz)
             leaf.pos.setXYZ(a + nVert, px, py, pz)
@@ -529,7 +557,84 @@ export function Book3D() {
       // Clic : droite = suivant (ou vidéo), gauche = précédent, fermé = ouvrir
       const raycaster = new THREE.Raycaster()
       const pointer = new THREE.Vector2()
+      // Glisser : la feuille suit le curseur, puis se pose ou revient selon la distance parcourue
+      let suppressClick = false
+      const drag = { active: false, moved: false, startX: 0, sideRight: true, leaf: null as Leaf | null, dir: 1, prog: 0 }
+      const pick = (clientX: number, clientY: number) => {
+        const r = renderer.domElement.getBoundingClientRect()
+        pointer.x = ((clientX - r.left) / r.width) * 2 - 1
+        pointer.y = -((clientY - r.top) / r.height) * 2 + 1
+        raycaster.setFromCamera(pointer, camera)
+        return raycaster.intersectObjects(leaves.map((l) => l.mesh), false)
+      }
+      const onDown = (e: PointerEvent) => {
+        if (fRef.current === 0) return
+        drag.active = true
+        drag.moved = false
+        drag.startX = e.clientX
+        const hits = pick(e.clientX, e.clientY)
+        drag.sideRight = !hits.length || hits[0].point.x >= 0
+      }
+      const onMove = (e: PointerEvent) => {
+        if (!drag.active) return
+        const dx = e.clientX - drag.startX
+        if (!drag.moved) {
+          if (Math.abs(dx) < 8) return
+          drag.moved = true
+          const cur = fRef.current
+          if (drag.sideRight && cur < LEAVES) {
+            drag.dir = 1
+            drag.leaf = leaves[cur]
+          } else if (!drag.sideRight && cur > 0) {
+            drag.dir = -1
+            drag.leaf = leaves[cur - 1]
+          } else {
+            drag.leaf = null
+          }
+          if (drag.leaf) {
+            drag.leaf.moving = true
+            drag.leaf.dragging = true
+            animating = true
+          }
+        }
+        if (!drag.leaf) return
+        const span = renderer.domElement.getBoundingClientRect().width * 0.42
+        const prog = Math.min(1, Math.max(0, drag.dir === 1 ? -dx / span : dx / span))
+        drag.prog = prog
+        drag.leaf.theta = drag.dir === 1 ? Math.PI * prog : Math.PI * (1 - prog)
+      }
+      const onUp = () => {
+        if (!drag.active) return
+        drag.active = false
+        const L = drag.leaf
+        if (!L) return
+        const commit = drag.prog > 0.45
+        const cur = fRef.current
+        L.dragging = false
+        L.from = L.theta
+        L.t0 = performance.now()
+        L.moving = true
+        animating = true
+        if (commit) {
+          L.to = drag.dir === 1 ? Math.PI : 0
+          const target = drag.dir === 1 ? cur + 1 : cur - 1
+          fRef.current = target
+          setF(target)
+        } else {
+          L.to = drag.dir === 1 ? 0 : Math.PI
+        }
+        if (drag.moved) suppressClick = true
+        drag.leaf = null
+      }
+      renderer.domElement.addEventListener("pointerdown", onDown)
+      renderer.domElement.addEventListener("pointermove", onMove)
+      window.addEventListener("pointerup", onUp)
+
       const onClick = (e: MouseEvent) => {
+        if (suppressClick) {
+          suppressClick = false
+          return
+        }
         const r = renderer.domElement.getBoundingClientRect()
         pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1
         pointer.y = -((e.clientY - r.top) / r.height) * 2 + 1
@@ -577,7 +682,7 @@ export function Book3D() {
         if (animating) {
           let any = false
           for (const l of leaves) {
-            if (!l.moving) continue
+            if (!l.moving || l.dragging) continue
             const t = Math.min(1, Math.max(0, (now - l.t0) / TURN_MS))
             l.theta = l.from + (l.to - l.from) * ease(t)
             if (t >= 1) { l.theta = l.to; l.moving = false }
@@ -603,6 +708,9 @@ export function Book3D() {
         cancelAnimationFrame(raf)
         ro.disconnect()
         renderer.domElement.removeEventListener("click", onClick)
+        renderer.domElement.removeEventListener("pointerdown", onDown)
+        renderer.domElement.removeEventListener("pointermove", onMove)
+        window.removeEventListener("pointerup", onUp)
         scene.traverse((o: T.Object3D) => {
           const m = o as T.Mesh
           if (m.geometry) m.geometry.dispose()

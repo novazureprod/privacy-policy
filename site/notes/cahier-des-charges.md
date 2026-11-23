@@ -164,3 +164,13 @@ Charte : voir `charte-novazure.md` et `charte/fonts.css`
 - Clic sur la page de droite : page suivante, ou ouverture de la vidéo sur les pages vidéo (fenêtre YouTube).
 - Miniatures YouTube chargées depuis i.ytimg.com (non vérifiable depuis l'environnement de travail) ; un dégradé reste affiché si elles ne se chargent pas.
 - Dépendance ajoutée : three (et @types/three).
+
+## Physique du livre — version PC (v14)
+
+- Couverture rigide : pivote sans se courber, avec un léger dégagement pour ne pas traverser la table.
+- Feuilles souples : courbure progressive depuis la reliure, bombe au centre pendant le tournage.
+- Creux de reliure : les pages s'abaissent près de la couture.
+- Grain de papier : texture de relief qui accroche la lumière rasante ; couverture satinée.
+- Glisser : la page suit le curseur, puis se pose si on dépasse la moitié, sinon elle revient.
+- Maillage plus fin (42 × 4) pour les courbes.
+- La version téléphone sera traitée à part.

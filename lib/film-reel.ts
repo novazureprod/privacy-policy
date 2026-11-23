@@ -67,29 +67,129 @@ function drawFrame(ctx: CanvasRenderingContext2D, img: HTMLImageElement | null, 
   ctx.fillText(`${n}  ▸  ${label.length > 38 ? label.slice(0, 37) + "…" : label}`, x0 + 8, yBot)
 }
 
-function buildCamera(): THREE.Group {
+// Logo Novazure en relief, au centre de la spirale : le phénix est détaché du cercle
+// (obturateur doré), qui reste en arrière-plan, plus discret. Le phénix est isolé à partir
+// des pixels bleu pétrole de l'image, puis ses parties dorées enclavées (N, liserés) sont
+// rattachées en bouchant les trous du masque. L'épaisseur vient d'un empilement de calques.
+function buildLogo(url: string): THREE.Group {
   const g = new THREE.Group()
-  const body = new THREE.MeshStandardMaterial({ color: 0x1b2535, metalness: 0.75, roughness: 0.32 })
-  const dark = new THREE.MeshStandardMaterial({ color: 0x0b0d12, metalness: 0.5, roughness: 0.5 })
-  const gold = new THREE.MeshStandardMaterial({ color: 0xc9a227, metalness: 0.95, roughness: 0.25 })
-  const glass = new THREE.MeshStandardMaterial({ color: 0x0a1a3a, metalness: 0.2, roughness: 0.05, emissive: 0x112244, emissiveIntensity: 0.6 })
-  const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, rx = 0) => {
-    const m = new THREE.Mesh(geo, mat)
-    m.position.set(x, y, z)
-    m.rotation.x = rx
-    g.add(m)
-    return m
-  }
-  add(new THREE.BoxGeometry(1.7, 1.0, 0.7), body, 0, 0, 0)
-  add(new THREE.BoxGeometry(1.72, 0.16, 0.72), dark, 0, -0.42, 0) // grip bas
-  add(new THREE.BoxGeometry(0.6, 0.32, 0.5), body, -0.05, 0.62, 0) // viseur
-  add(new THREE.BoxGeometry(0.22, 0.1, 0.22), gold, 0.55, 0.55, 0.1) // déclencheur
-  add(new THREE.CylinderGeometry(0.42, 0.42, 0.18, 48), gold, 0, 0, 0.44, Math.PI / 2) // bague
-  add(new THREE.CylinderGeometry(0.38, 0.4, 0.55, 48), dark, 0, 0, 0.7, Math.PI / 2) // fût
-  add(new THREE.CylinderGeometry(0.4, 0.4, 0.06, 48), gold, 0, 0, 0.98, Math.PI / 2)
-  add(new THREE.CylinderGeometry(0.3, 0.3, 0.02, 48), glass, 0, 0, 1.0, Math.PI / 2) // lentille
-  const flashRing = add(new THREE.TorusGeometry(0.13, 0.025, 12, 36), gold, 0.6, 0.25, 0.36)
-  flashRing.rotation.x = 0
+  const HEIGHT = 2.2 // hauteur du logo dans la scène
+  new THREE.ImageLoader().load(url, (img) => {
+    const w = img.naturalWidth
+    const h = img.naturalHeight
+    const src = document.createElement("canvas")
+    src.width = w
+    src.height = h
+    const sctx = src.getContext("2d", { willReadFrequently: true })!
+    sctx.drawImage(img, 0, 0)
+    const data = sctx.getImageData(0, 0, w, h).data
+
+    // 1. Pixels du phénix : bleu pétrole (bleu et vert nettement au-dessus du rouge).
+    const mask = new Uint8Array(w * h)
+    for (let i = 0; i < w * h; i++) {
+      const r = data[i * 4]
+      const gg = data[i * 4 + 1]
+      const b = data[i * 4 + 2]
+      const a = data[i * 4 + 3]
+      if (a > 40 && b > r + 18 && gg > r + 6) mask[i] = 1
+    }
+    // 2. Dilatation légère : récupère les contours sombres et les liserés dorés des plumes.
+    const dilate = (m: Uint8Array, rad: number) => {
+      const out = new Uint8Array(w * h)
+      for (let y = 0; y < h; y++)
+        for (let x = 0; x < w; x++) {
+          if (!m[y * w + x]) continue
+          for (let dy = -rad; dy <= rad; dy++)
+            for (let dx = -rad; dx <= rad; dx++) {
+              const xx = x + dx
+              const yy = y + dy
+              if (xx >= 0 && yy >= 0 && xx < w && yy < h && dx * dx + dy * dy <= rad * rad) out[yy * w + xx] = 1
+            }
+        }
+      return out
+    }
+    const grown = dilate(mask, 4)
+    // 3. Bouche les trous (le N doré, l'intérieur des ailes) : tout ce qui n'est pas
+    //    joignable depuis le bord sans traverser le phénix lui appartient.
+    const outside = new Uint8Array(w * h)
+    const stack: number[] = []
+    for (let x = 0; x < w; x++) stack.push(x, (h - 1) * w + x)
+    for (let y = 0; y < h; y++) stack.push(y * w, y * w + w - 1)
+    while (stack.length) {
+      const i = stack.pop()!
+      if (outside[i] || grown[i]) continue
+      outside[i] = 1
+      const x = i % w
+      const y = (i / w) | 0
+      if (x > 0) stack.push(i - 1)
+      if (x < w - 1) stack.push(i + 1)
+      if (y > 0) stack.push(i - w)
+      if (y < h - 1) stack.push(i + w)
+    }
+    // Les trous trop grands (zones dorées du cercle encerclées par les ailes) restent au cercle.
+    const phoenix = new Uint8Array(w * h)
+    const seen = new Uint8Array(w * h)
+    for (let i = 0; i < w * h; i++) {
+      if (grown[i]) phoenix[i] = 1
+      else if (!outside[i] && !seen[i]) {
+        const region: number[] = []
+        const st = [i]
+        while (st.length) {
+          const k = st.pop()!
+          if (seen[k] || grown[k] || outside[k]) continue
+          seen[k] = 1
+          region.push(k)
+          const x = k % w
+          const y = (k / w) | 0
+          if (x > 0) st.push(k - 1)
+          if (x < w - 1) st.push(k + 1)
+          if (y > 0) st.push(k - w)
+          if (y < h - 1) st.push(k + w)
+        }
+        if (region.length < 4000) for (const k of region) phoenix[k] = 1
+      }
+    }
+
+    const layer = (keep: (i: number) => boolean) => {
+      const c = document.createElement("canvas")
+      c.width = w
+      c.height = h
+      const ctx = c.getContext("2d")!
+      const out = ctx.createImageData(w, h)
+      for (let i = 0; i < w * h; i++) {
+        if (!keep(i)) continue
+        out.data.set(data.subarray(i * 4, i * 4 + 4), i * 4)
+      }
+      ctx.putImageData(out, 0, 0)
+      const t = new THREE.CanvasTexture(c)
+      t.colorSpace = THREE.SRGBColorSpace
+      return t
+    }
+    const bird = layer((i) => phoenix[i] === 1)
+    const ring = layer((i) => phoenix[i] === 0 && data[i * 4 + 3] > 0)
+    const W = (HEIGHT * w) / h
+    const plane = new THREE.PlaneGeometry(W, HEIGHT)
+    // Empilement : la face avant en couleurs, les calques derrière assombris forment la tranche.
+    const stackOf = (tex: THREE.Texture, z: number, depth: number, layers: number, light: number, opacity: number) => {
+      for (let k = layers; k >= 0; k--) {
+        const front = k === 0
+        const mat = new THREE.MeshBasicMaterial({
+          map: tex,
+          transparent: true,
+          alphaTest: 0.4,
+          opacity,
+          depthWrite: true,
+          side: THREE.DoubleSide,
+        })
+        mat.color.setScalar(front ? light : light * (0.28 + 0.2 * (1 - k / layers)))
+        const m = new THREE.Mesh(plane, mat)
+        m.position.z = z - (k / layers) * depth
+        g.add(m)
+      }
+    }
+    stackOf(ring, -0.35, 0.08, 6, 0.62, 0.85) // cercle : en retrait, plus sombre, mais bien présent
+    stackOf(bird, 0.25, 0.18, 14, 1, 1) // phénix : détaché vers l'avant, plus épais
+  })
   return g
 }
 
@@ -100,6 +200,7 @@ export function mountFilmReel(
   items: ReelItem[],
   onSelect: (item: ReelItem) => void,
   track: HTMLElement = container,
+  logoUrl = "/logo/logo-mark.png",
 ) {
   const n = items.length
   const L = n * FRAME_L
@@ -124,8 +225,8 @@ export function mountFilmReel(
 
   const rig = new THREE.Group() // incline l'ensemble pour la perspective
   scene.add(rig)
-  const camera3d = buildCamera()
-  rig.add(camera3d)
+  const logo3d = buildLogo(logoUrl)
+  rig.add(logo3d)
 
   // Spirale elliptique autour d'un axe vertical : devant l'appareil, la bande file à
   // l'horizontale d'un bord à l'autre de l'écran, puis repasse derrière en montant.
@@ -135,6 +236,7 @@ export function mountFilmReel(
   let pitch = FILM_H + 0.45
   let perim = 1
   let height = 1
+  let shift = 0 // décale la spirale pour laisser le centre (le logo) entre deux passages de la bande
   const TABLE = 720
   const arc = new Float32Array(TABLE + 1) // longueur cumulée sur un tour, pour un pas régulier
   const buildPath = () => {
@@ -151,6 +253,10 @@ export function mountFilmReel(
     }
     perim = arc[TABLE]
     height = (L / perim) * pitch
+    // Passages avant de la bande : y = (k + 0.5) * pitch - height / 2. On les cale à ±pitch/2.
+    const y0 = 0.5 * pitch - height / 2
+    shift = (((pitch / 2 - y0) % pitch) + pitch) % pitch
+    if (shift > pitch / 2) shift -= pitch
   }
   const thetaAt = (s: number) => {
     const turns = Math.floor(s / perim)
@@ -174,7 +280,7 @@ export function mountFilmReel(
   const q = new THREE.Vector3()
   const place = (s: number, out: THREE.Vector3) => {
     const th = thetaAt(s)
-    out.set(A * Math.cos(th), (s / perim) * pitch - height / 2, B * Math.sin(th))
+    out.set(A * Math.cos(th), (s / perim) * pitch - height / 2 + shift, B * Math.sin(th))
     return th
   }
   const pointAt = (s: number, out: THREE.Vector3, normal: THREE.Vector3, tangent: THREE.Vector3) => {
@@ -231,7 +337,7 @@ export function mountFilmReel(
     cam.aspect = w / h
     vertical = cam.aspect < 0.85
     const t = Math.tan(((cam.fov * Math.PI) / 180) / 2)
-    pitch = FILM_H + (vertical ? 0.9 : 1.5)
+    pitch = FILM_H + (vertical ? 1.5 : 2.1)
     B = vertical ? 1.5 : 1.9
     // La largeur seule fixe la distance : la bande avant déborde des deux bords, les
     // vignettes restent grandes, et la spirale dépasse en haut et en bas de l'écran.
@@ -243,7 +349,7 @@ export function mountFilmReel(
     cam.position.set(0, 0.35, dist)
     cam.lookAt(0, 0, 0)
     cam.updateProjectionMatrix()
-    camera3d.scale.setScalar(vertical ? 0.95 : 1.35)
+    logo3d.scale.setScalar(vertical ? 0.62 : 1)
   }
   layout()
   const ro = new ResizeObserver(layout)
@@ -344,8 +450,10 @@ export function mountFilmReel(
     // Suit le défilement en douceur ; sans défilement, rien ne bouge.
     const goal = progress() * travel()
     offset += (goal - offset) * (reduce ? 1 : Math.min(1, dt * 7))
-    camera3d.rotation.y = -0.65
-    camera3d.rotation.x = 0.04
+    // Le logo pivote à peine avec le défilement : on voit le phénix se détacher du cercle.
+    const pr = progress()
+    logo3d.rotation.y = (pr - 0.5) * 0.7
+    logo3d.rotation.x = -0.12
     update()
     renderer.render(scene, cam)
   }

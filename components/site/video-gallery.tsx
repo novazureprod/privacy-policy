@@ -3,12 +3,12 @@
 import { CircularGallery, type GalleryItem } from "@/components/ui/circular-gallery"
 import { PORTFOLIO_VIDEOS } from "@/lib/portfolio"
 
-// Une carte par vidéo : miniature YouTube, titre et niche. Un clic ouvre la vidéo sur YouTube.
+// Une carte par vidéo : miniature maison (sinon YouTube), titre et niche. Un clic ouvre la vidéo sur YouTube.
 const items: GalleryItem[] = PORTFOLIO_VIDEOS.map((v) => ({
   common: v.title,
   binomial: v.niche ?? "Réalisation",
   photo: {
-    url: `https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg`,
+    url: v.thumbnail ?? `https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg`,
     text: v.title,
     by: "Novazure",
   },

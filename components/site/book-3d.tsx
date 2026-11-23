@@ -33,7 +33,7 @@ const PAGES: PageDef[] = [
   ]),
   { kind: "end" },
 ]
-const LEAVES = Math.ceil(PAGES.length / 2) + 1 // couverture + feuilles intérieures
+const LEAVES = Math.floor(PAGES.length / 2) + 1 // couverture + feuilles intérieures
 const FLIPS = LEAVES // f = nombre de feuilles tournées : 0 fermé, LEAVES dernière page
 
 // Page affichée à gauche et à droite après f tournages
@@ -374,6 +374,7 @@ export function Book3D() {
         const t = p && p.kind === "thumb" && p.video !== undefined ? thumbImgs[p.video] : null
         const c = drawPage(p ?? null, t)
         const tex = faceTex[idx]
+        tex.dispose() // force la réallocation GPU à la bonne taille
         tex.image = c
         tex.needsUpdate = true
       }

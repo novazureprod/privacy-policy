@@ -150,3 +150,12 @@ body {
   100% { transform: rotateY(0deg) skewY(0deg) scaleX(1); }
 }
 @media (prefers-reduced-motion: reduce) { .page-bend-fwd, .page-bend-back { animation: none !important; } }
+
+/* Pellicule : bandes perforées de la galerie en spirale */
+.film-holes {
+  background-color: #07080b;
+  background-image: linear-gradient(90deg, transparent 6px, rgba(217, 221, 228, 0.85) 6px, rgba(217, 221, 228, 0.85) 15px, transparent 15px);
+  background-size: 21px 9px;
+  background-repeat: repeat-x;
+  background-position: 0 50%;
+}

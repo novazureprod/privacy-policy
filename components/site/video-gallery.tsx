@@ -1,29 +1,24 @@
 "use client"
 
-import { CircularGallery, type GalleryItem } from "@/components/ui/circular-gallery"
+import { SpiralFilmGallery, type FilmFrame } from "@/components/ui/spiral-film-gallery"
 import { PORTFOLIO_VIDEOS } from "@/lib/portfolio"
 
-// Une carte par vidéo : miniature maison (sinon YouTube), titre et niche. Un clic ouvre la vidéo sur YouTube.
-const items: GalleryItem[] = PORTFOLIO_VIDEOS.map((v) => ({
-  common: v.title,
-  binomial: v.niche ?? "Réalisation",
-  photo: {
-    url: v.thumbnail ?? `https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg`,
-    text: v.title,
-    by: "Novazure",
-  },
+// Une vignette par vidéo : miniature maison (sinon YouTube), titre et niche.
+// Un clic ouvre la vidéo sur YouTube.
+const frames: FilmFrame[] = PORTFOLIO_VIDEOS.map((v) => ({
+  id: v.youtubeId,
+  image: v.thumbnail ?? `https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg`,
+  title: v.title,
+  subtitle: v.niche ?? "Réalisation",
 }))
 
 export function VideoGallery() {
-  const open = (e: React.MouseEvent<HTMLDivElement>) => {
-    const card = (e.target as HTMLElement).closest<HTMLElement>('[role="group"]')
-    if (!card) return
-    const v = PORTFOLIO_VIDEOS.find((x) => x.title === card.getAttribute("aria-label"))
-    if (v) window.open(`https://www.youtube.com/watch?v=${v.youtubeId}`, "_blank", "noopener")
-  }
   return (
-    <div className="h-[70svh] w-full cursor-pointer" onClick={open}>
-      <CircularGallery items={items} radius={420} autoRotateSpeed={0.05} />
+    <div className="h-[85svh] min-h-[560px] w-full">
+      <SpiralFilmGallery
+        frames={frames}
+        onSelect={(f) => window.open(`https://www.youtube.com/watch?v=${f.id}`, "_blank", "noopener")}
+      />
     </div>
   )
 }

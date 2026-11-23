@@ -36,7 +36,7 @@ export function NicheMenu({ current }: { current?: string }) {
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={() => setOpen((o) => !o)}
-        className="glass glass-gold flex items-center gap-2 rounded-full px-5 py-2.5 font-sub text-xs tracking-[0.2em] uppercase text-[var(--nz-text)]"
+        className="glass glass-gold flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2.5 font-sub text-[10px] tracking-[0.16em] uppercase text-[var(--nz-text)] sm:gap-2 sm:px-5 sm:text-xs sm:tracking-[0.2em]"
       >
         {currentLabel}
         <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />

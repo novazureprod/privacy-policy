@@ -3,8 +3,9 @@
 import { useEffect, useRef } from "react"
 
 /**
- * Fond animé « poussière d'or » : une vague de particules dorées et beiges posée sur un voile
- * de soie bleue, des grains qui se détachent et s'envolent, et un bokeh flou au premier plan.
+ * Fond animé « satin et poussière d'or » : un drap de satin bleu fait de fines lignes qui
+ * ondulent comme un tissu (les plis accrochent la lumière), une poussière d'or posée sur la crête
+ * qui s'élève lentement vers le haut, et un bokeh flou au premier plan.
  * Une seule image fixe si l'utilisateur préfère moins de mouvement.
  */
 export function Particles() {
@@ -21,139 +22,162 @@ export function Particles() {
     let h = 0
     let raf = 0
     let t = 0
+    let small = false
+    const LINES = 54
 
-    // Grain de la vague : position le long de la vague (u), écart à la crête (v), taille, scintillement.
-    type Dust = { u: number; v: number; r: number; s: number; ph: number; gold: boolean }
-    // Grain qui s'est détaché et s'envole.
-    type Spark = { x: number; y: number; vx: number; vy: number; r: number; life: number; max: number }
-    // Bokeh flou du premier plan.
-    type Bokeh = { x: number; y: number; r: number; vx: number; a: number; gold: boolean }
-    let dust: Dust[] = []
-    let sparks: Spark[] = []
+    // Forme du drap : chaque ligne i est un fil du tissu ; les plis viennent de plusieurs ondes.
+    const fold = (x: number, i: number, time: number) => {
+      const u = x / w
+      const k = i / LINES
+      const base = h * (0.42 + k * 0.5) - h * 0.22 * u * (1 - k * 0.6)
+      return (
+        base +
+        Math.sin(u * 4.2 + time * 0.22 + k * 1.6) * h * 0.05 * (1 - k * 0.4) +
+        Math.sin(u * 9.5 - time * 0.16 + k * 3.1) * h * 0.018 +
+        Math.sin(u * 2.1 + time * 0.12 - k * 2.4) * h * 0.04
+      )
+    }
+
+    // Grain posé sur le tissu (suit les plis) ou grain qui s'élève vers le haut.
+    type Grain = { u: number; i: number; r: number; ph: number; gold: boolean }
+    type Rise = { x: number; y: number; vx: number; vy: number; r: number; life: number; max: number; gold: boolean }
+    type Bokeh = { x: number; y: number; r: number; vy: number; a: number; gold: boolean }
+    let grains: Grain[] = []
+    let rising: Rise[] = []
     let bokeh: Bokeh[] = []
 
-    // Crête de la vague principale : monte de gauche à droite, ondule lentement.
-    const wave = (x: number, time: number, k = 1) =>
-      h * (0.62 - 0.2 * (x / w) * k) + Math.sin(x / (w * 0.22) + time * 0.35) * h * 0.035 + Math.sin(x / (w * 0.09) - time * 0.5) * h * 0.012
-
-    const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5
+    const spawnRise = (anywhere = false): Rise => {
+      const x = Math.random() * w
+      const i = Math.abs((Math.random() + Math.random() - 1) * 10)
+      const y = anywhere ? Math.random() * h : fold(x, i, t)
+      const max = 260 + Math.random() * 380
+      return {
+        x,
+        y,
+        vx: (Math.random() - 0.3) * 0.25,
+        vy: -(0.18 + Math.random() * 0.5),
+        r: Math.random() < 0.15 ? Math.random() * 1.8 + 1.2 : Math.random() * 1.1 + 0.4,
+        life: anywhere ? Math.random() * max : 0,
+        max,
+        gold: Math.random() < 0.85,
+      }
+    }
 
     const size = () => {
       const d = Math.min(window.devicePixelRatio || 1, 1.5)
       w = window.innerWidth
       h = window.innerHeight
+      small = w < 700
       canvas.width = w * d
       canvas.height = h * d
       canvas.style.width = `${w}px`
       canvas.style.height = `${h}px`
       ctx.setTransform(d, 0, 0, d, 0, 0)
-      const small = w < 700
-      const n = small ? 650 : 1400
-      dust = Array.from({ length: n }, () => {
-        // Plus dense juste sous la crête, plus clairsemé en descendant.
-        const below = Math.abs(gauss()) * h * (Math.random() < 0.75 ? 0.18 : 0.42)
-        return {
-          u: Math.random(),
-          v: Math.random() < 0.12 ? -Math.random() * h * 0.05 : below,
-          r: Math.random() < 0.1 ? Math.random() * 2 + 1.4 : Math.random() * 1.3 + 0.45,
-          s: (Math.random() * 0.6 + 0.4) * 0.00012,
-          ph: Math.random() * Math.PI * 2,
-          gold: Math.random() < 0.85,
-        }
-      })
-      bokeh = Array.from({ length: small ? 14 : 26 }, () => ({
+      grains = Array.from({ length: small ? 520 : 1100 }, () => ({
+        u: Math.random(),
+        // Concentrés sur les premiers fils (la crête), plus rares en descendant.
+        i: Math.pow(Math.random(), 2.2) * LINES * 0.55,
+        r: Math.random() < 0.1 ? Math.random() * 1.6 + 1.1 : Math.random() * 1.1 + 0.35,
+        ph: Math.random() * Math.PI * 2,
+        gold: Math.random() < 0.85,
+      }))
+      rising = Array.from({ length: small ? 70 : 150 }, () => spawnRise(true))
+      bokeh = Array.from({ length: small ? 14 : 24 }, () => ({
         x: Math.random() * w,
-        y: h * (0.72 + Math.random() * 0.3),
-        r: Math.random() * (small ? 12 : 18) + 6,
-        vx: (Math.random() - 0.5) * 0.08,
-        a: Math.random() * 0.22 + 0.08,
+        y: h * (0.7 + Math.random() * 0.35),
+        r: Math.random() * (small ? 12 : 20) + 6,
+        vy: -(0.05 + Math.random() * 0.12),
+        a: Math.random() * 0.2 + 0.07,
         gold: Math.random() < 0.7,
       }))
-      sparks = []
     }
 
-    const silk = (time: number, offset: number, width: number, alpha: number, k: number) => {
-      // Voile de soie : plusieurs traits larges et transparents qui suivent la vague.
-      for (let layer = 0; layer < 6; layer++) {
+    const satin = () => {
+      const step = small ? 18 : 12
+      const stops = 9
+      for (let i = 0; i < LINES; i++) {
+        // Éclairage du fil : plus clair là où le pli monte (pente), comme la lumière sur du satin.
+        const grad = ctx.createLinearGradient(0, 0, w, 0)
+        for (let s = 0; s <= stops; s++) {
+          const x = (s / stops) * w
+          const slope = (fold(x + 6, i, t) - fold(x - 6, i, t)) / 12
+          const light = Math.max(0, Math.min(1, 0.25 - slope * 3.2))
+          const depth = 1 - i / LINES
+          const a = (0.025 + light * 0.16) * (0.35 + depth * 0.65)
+          grad.addColorStop(s / stops, `rgba(${Math.round(40 + light * 70)}, ${Math.round(90 + light * 90)}, ${Math.round(200 + light * 55)}, ${a})`)
+        }
         ctx.beginPath()
-        for (let x = -20; x <= w + 20; x += 24) {
-          const y = wave(x, time + offset, k) + offset * h * 0.25 + layer * 4
-          if (x === -20) ctx.moveTo(x, y)
+        for (let x = -step; x <= w + step; x += step) {
+          const y = fold(x, i, t)
+          if (x === -step) ctx.moveTo(x, y)
           else ctx.lineTo(x, y)
         }
-        ctx.lineWidth = width * (1 - layer * 0.12)
-        ctx.strokeStyle = `rgba(52, 104, 214, ${alpha * (1 - layer * 0.14)})`
+        ctx.strokeStyle = grad
+        // Fils larges qui se chevauchent : la surface paraît continue, comme un tissu.
+        ctx.lineWidth = ((h * 0.5) / LINES) * 2.2
         ctx.stroke()
       }
     }
 
+    const dot = (x: number, y: number, r: number, gold: boolean, a: number) => {
+      ctx.fillStyle = gold ? `rgba(246, 190, 98, ${a})` : `rgba(240, 226, 200, ${a})`
+      ctx.beginPath()
+      ctx.arc(x, y, r, 0, Math.PI * 2)
+      ctx.fill()
+    }
+
     const frame = () => {
       ctx.clearRect(0, 0, w, h)
-      ctx.globalCompositeOperation = "lighter"
 
-      silk(t, 0, h * 0.09, 0.085, 1)
-      silk(t * 0.8, 0.55, h * 0.12, 0.06, 0.6)
-      // Les grains restent dorés : pas de mélange additif qui les blanchirait.
+      ctx.globalCompositeOperation = "lighter"
+      ctx.filter = small ? "none" : "blur(1.5px)"
+      satin()
+      ctx.filter = "none"
       ctx.globalCompositeOperation = "source-over"
 
-      // Poussière d'or le long de la vague
-      for (const p of dust) {
-        if (!reduce) p.u = (p.u + p.s * 16) % 1.08
-        const x = p.u * (w + 40) - 20
-        const y = wave(x, t) + p.v
-        const tw = 0.55 + 0.45 * Math.sin(t * 2 + p.ph)
-        const depth = Math.max(0.25, 1 - p.v / (h * 0.5))
-        const a = Math.min(1, tw * depth * (p.gold ? 1.15 : 0.8))
-        ctx.fillStyle = p.gold ? `rgba(246, 188, 96, ${a})` : `rgba(240, 228, 205, ${a})`
-        ctx.beginPath()
-        ctx.arc(x, y, p.r, 0, Math.PI * 2)
-        ctx.fill()
-        // Quelques grains de la crête se détachent et s'envolent
-        if (!reduce && p.v < h * 0.02 && Math.random() < 0.0009 && sparks.length < 60) {
-          const max = 180 + Math.random() * 160
-          sparks.push({ x, y, vx: 0.15 + Math.random() * 0.35, vy: -(0.25 + Math.random() * 0.45), r: p.r * 0.9 + 0.4, life: 0, max })
+      // Poussière posée sur le tissu : suit les plis et scintille
+      for (const g of grains) {
+        const x = g.u * w
+        const y = fold(x, g.i, t) - 2
+        const tw = 0.5 + 0.5 * Math.sin(t * 2.2 + g.ph)
+        dot(x, y, g.r, g.gold, Math.min(1, tw * (1 - g.i / LINES) * 1.25))
+      }
+
+      // Poussière qui s'élève vers le haut, se balance un peu et s'éteint
+      for (let k = 0; k < rising.length; k++) {
+        const p = rising[k]
+        if (!reduce) {
+          p.life++
+          p.x += p.vx + Math.sin((p.life + k * 13) / 40) * 0.15
+          p.y += p.vy
         }
+        const f = p.life / p.max
+        if (f >= 1 || p.y < -10) {
+          rising[k] = spawnRise()
+          continue
+        }
+        dot(p.x, p.y, p.r, p.gold, Math.sin(Math.PI * f) * 0.9)
       }
 
+      // Bokeh flou du premier plan, qui monte lui aussi très lentement
       ctx.globalCompositeOperation = "lighter"
-      // Grains détachés : montent, ralentissent, s'éteignent
-      sparks = sparks.filter((s) => s.life < s.max)
-      for (const s of sparks) {
-        s.life++
-        s.x += s.vx
-        s.y += s.vy
-        s.vy *= 0.996
-        const k = s.life / s.max
-        const a = Math.sin(Math.PI * k) * 0.9
-        const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 4)
-        g.addColorStop(0, `rgba(240, 205, 135, ${a})`)
-        g.addColorStop(1, "rgba(240, 205, 135, 0)")
-        ctx.fillStyle = g
-        ctx.beginPath()
-        ctx.arc(s.x, s.y, s.r * 4, 0, Math.PI * 2)
-        ctx.fill()
-      }
-
-      // Bokeh flou du premier plan
       for (const b of bokeh) {
         if (!reduce) {
-          b.x += b.vx
-          if (b.x < -40) b.x = w + 40
-          if (b.x > w + 40) b.x = -40
+          b.y += b.vy
+          if (b.y < h * 0.55) b.y = h * (1 + Math.random() * 0.1)
         }
-        const pulse = 0.8 + 0.2 * Math.sin(t * 0.8 + b.x)
         const col = b.gold ? "232, 176, 96" : "90, 140, 230"
         const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r)
-        g.addColorStop(0, `rgba(${col}, ${b.a * pulse})`)
-        g.addColorStop(0.7, `rgba(${col}, ${b.a * pulse * 0.55})`)
+        g.addColorStop(0, `rgba(${col}, ${b.a})`)
+        g.addColorStop(0.7, `rgba(${col}, ${b.a * 0.55})`)
         g.addColorStop(1, `rgba(${col}, 0)`)
         ctx.fillStyle = g
         ctx.beginPath()
         ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2)
         ctx.fill()
       }
-
       ctx.globalCompositeOperation = "source-over"
+
       t += 0.016
       if (!reduce) raf = requestAnimationFrame(frame)
     }

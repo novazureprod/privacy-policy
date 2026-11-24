@@ -1,14 +1,10 @@
-import { Particles } from "./particles"
+import { DustBackground } from "./dust-background"
 
-/**
- * Fond commun à toutes les pages : nappes de lumière bleue et or qui dérivent lentement,
- * trame de points, et particules lumineuses. Fixe, derrière le contenu, sans interaction.
- */
+/** Fond commun à toutes les pages : vagues de poussière d'or en WebGL. Fixe, derrière le contenu. */
 export function AmbientBackground() {
   return (
     <div aria-hidden="true" className="ambient pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <div className="ambient-blob ambient-blob--blue" />
-      <Particles />
+      <DustBackground />
     </div>
   )
 }

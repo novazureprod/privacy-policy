@@ -28,10 +28,11 @@ export function Team() {
           Une équipe complète, de la stratégie à la livraison, pour que vous n&apos;ayez rien à gérer.
         </p>
       </Reveal>
-      <ul className="mx-auto mt-12 grid max-w-6xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {TEAM.map((m, i) => (
-          <li key={m.role}>
-            <Reveal delay={(i % 4) * 100} className="h-full">
+      {/* Carrousel continu : la liste est doublée pour boucler sans saut ; il s'arrête au survol. */}
+      <div className="team-marquee mx-auto mt-12 max-w-6xl overflow-hidden">
+        <ul className="team-track flex w-max gap-4 py-3">
+          {[...TEAM, ...TEAM].map((m, i) => (
+            <li key={`${m.role}-${i}`} className="w-[260px] shrink-0 sm:w-[272px]" aria-hidden={i >= TEAM.length || undefined}>
               <figure className="glass lift team-card flex h-full flex-col overflow-hidden rounded-2xl">
                 <div className="relative aspect-[4/3.4] overflow-hidden border-b border-[rgba(201,163,90,.5)] bg-[radial-gradient(ellipse_at_50%_30%,#1e3a8a,#0b1838_70%)]">
                   {m.photo ? (
@@ -50,10 +51,10 @@ export function Team() {
                   <p className="mt-3 text-sm leading-relaxed text-[var(--nz-muted)]">{m.text}</p>
                 </figcaption>
               </figure>
-            </Reveal>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   )
 }

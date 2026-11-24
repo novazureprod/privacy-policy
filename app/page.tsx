@@ -148,37 +148,34 @@ export default function HomePage() {
       </section>
       <NextSection href="#contact" label="Prendre rendez-vous" />
 
-      <section id="contact" className="px-5 py-28 sm:px-10" aria-labelledby="titre-contact">
-        <Reveal>
-          <div className="glass mx-auto max-w-4xl rounded-3xl px-6 py-14 text-center sm:px-14">
+      <section id="contact" className="px-5 py-20 sm:px-10" aria-labelledby="titre-contact">
+        <div className="mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-[1fr_auto]">
+          <Reveal>
             <p className="eyebrow">Contact</p>
             <h2 id="titre-contact" className="metal-text mt-3 font-display text-3xl font-extrabold sm:text-5xl">
               Parlons de votre projet
             </h2>
-            <p className="mx-auto mt-4 max-w-lg text-[var(--nz-muted)]">
+            <p className="mt-4 max-w-md text-[var(--nz-muted)]">
               Un premier appel de trente minutes, sans engagement, pour voir ce que la vidéo peut faire pour vous.
-              Choisissez votre créneau, tout se fait ici.
+              Choisissez votre créneau : tout se fait ici.
             </p>
-            <div id="rdv" className="mt-10 scroll-mt-28">
-              <BookingCalendar />
-            </div>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-wrap gap-3">
               {SITE.email && (
-                <a href={`mailto:${SITE.email}`} className="glass glass-gold rounded-full px-10 py-4 font-sub text-xs tracking-[0.2em] uppercase">
+                <a href={`mailto:${SITE.email}`} className="glass glass-gold rounded-full px-7 py-3 font-sub text-[11px] tracking-[0.2em] uppercase">
                   Écrire un e-mail
                 </a>
               )}
-              <a
-                href={SITE.youtube}
-                target="_blank"
-                rel="noopener"
-                className="glass glass-gold rounded-full px-10 py-4 font-sub text-xs tracking-[0.2em] uppercase"
-              >
+              <a href={SITE.youtube} target="_blank" rel="noopener" className="glass glass-gold rounded-full px-7 py-3 font-sub text-[11px] tracking-[0.2em] uppercase">
                 Voir la chaîne YouTube
               </a>
             </div>
-          </div>
-        </Reveal>
+          </Reveal>
+          <Reveal delay={150}>
+            <div id="rdv" className="scroll-mt-28">
+              <BookingCalendar />
+            </div>
+          </Reveal>
+        </div>
       </section>
 
       <Footer />

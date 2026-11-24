@@ -33,11 +33,11 @@ export function Reviews() {
         {/* Compteur d'avis */}
         <div className="glass mx-auto mt-8 inline-flex items-center gap-5 rounded-full px-7 py-3">
           <span className="font-display text-3xl font-extrabold">
-            <Counter to={REVIEWS.length} />
+            +<Counter to={40} />
           </span>
           <span className="text-left leading-tight">
-            <Stars className="text-base" />
-            <span className="block font-sub text-[11px] tracking-[0.18em] text-[var(--nz-muted)] uppercase">avis · note 5/5</span>
+            <span className="stars-47 text-base" aria-label="Note moyenne 4,7 sur 5"><span>★★★★★</span></span>
+            <span className="block font-sub text-[11px] tracking-[0.18em] text-[var(--nz-muted)] uppercase">avis · note moyenne 4,7/5</span>
           </span>
         </div>
       </Reveal>

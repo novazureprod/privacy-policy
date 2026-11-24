@@ -53,15 +53,14 @@ export function StoryTimeline() {
           scrollTrigger: { trigger: section, start: "top top", end: "bottom bottom", scrub: 0.6, invalidateOnRefresh: true, onRefreshInit: setHeight },
         })
         gsap.fromTo(line, { scaleX: 0 }, { scaleX: 1, ease: "none", scrollTrigger: { trigger: section, start: "top top", end: "bottom bottom", scrub: 0.6 } })
-        // Chaque étape s'allume quand elle arrive vers le centre de l'écran
+        // Chaque étape se dévoile au fur et à mesure qu'elle entre à l'écran :
+        // le point s'allume, puis le titre, l'image se découvre de gauche à droite, enfin le texte.
         track.querySelectorAll<HTMLElement>(".tl-step").forEach((el) => {
-          ScrollTrigger.create({
-            trigger: el,
-            containerAnimation: tween,
-            start: "left 75%",
-            end: "right 20%",
-            onToggle: (s) => el.classList.toggle("is-on", s.isActive || s.progress > 0),
-          })
+          const st = (start: string, end: string) => ({ trigger: el, containerAnimation: tween, start, end, scrub: true })
+          ScrollTrigger.create({ trigger: el, containerAnimation: tween, start: "left 85%", end: "right 15%", onToggle: (s) => el.classList.toggle("is-on", s.isActive || s.progress > 0) })
+          gsap.fromTo(el.querySelector(".tl-head"), { y: 40, opacity: 0 }, { y: 0, opacity: 1, ease: "none", scrollTrigger: st("left 98%", "left 72%") })
+          gsap.fromTo(el.querySelector(".tl-img"), { clipPath: "inset(0 100% 0 0 round 16px)", opacity: 0.4 }, { clipPath: "inset(0 0% 0 0 round 16px)", opacity: 1, ease: "none", scrollTrigger: st("left 90%", "left 55%") })
+          gsap.fromTo(el.querySelector(".tl-text"), { y: 30, opacity: 0 }, { y: 0, opacity: 1, ease: "none", scrollTrigger: st("left 78%", "left 48%") })
         })
       }, section)
       cleanup = () => ctx.revert()
@@ -90,8 +89,10 @@ export function StoryTimeline() {
             {STEPS.map((s, i) => (
               <article key={s.title} className="tl-step relative w-[78vw] shrink-0 pt-12 sm:w-[46vw] lg:w-[30vw]">
                 <span className="tl-dot absolute top-[16px] left-0 h-3 w-3 rounded-full" aria-hidden="true" />
-                <p className="font-sub text-[11px] tracking-[0.25em] text-[var(--nz-gold)] uppercase">{s.tag}</p>
-                <h3 className="mt-2 font-display text-xl font-extrabold sm:text-2xl">{s.title}</h3>
+                <div className="tl-head">
+                  <p className="font-sub text-[11px] tracking-[0.25em] text-[var(--nz-gold)] uppercase">{s.tag}</p>
+                  <h3 className="mt-2 font-display text-xl font-extrabold sm:text-2xl">{s.title}</h3>
+                </div>
                 {s.image ? (
                   <img src={s.image} alt="" loading="lazy" className="tl-img mt-4 aspect-[16/8.2] w-full rounded-2xl border border-[rgba(224,197,143,.35)] object-cover" />
                 ) : (
@@ -99,7 +100,7 @@ export function StoryTimeline() {
                     <span className="metal-text font-display text-5xl font-extrabold sm:text-6xl">{s.big}</span>
                   </div>
                 )}
-                <p className="mt-4 max-w-md text-sm leading-relaxed text-[var(--nz-muted)] sm:text-base">{s.text}</p>
+                <p className="tl-text mt-4 max-w-md text-base leading-relaxed sm:text-[17px]">{s.text}</p>
                 <span className="sr-only">{`${i + 1} sur ${STEPS.length}`}</span>
               </article>
             ))}

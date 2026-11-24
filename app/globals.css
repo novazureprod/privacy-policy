@@ -344,3 +344,57 @@ footer { border-top-color: rgba(224, 197, 143, 0.22) !important; }
 /* V4 : créneaux du calendrier */
 .booking .slot { transition: background .25s, box-shadow .25s, transform .2s; }
 .booking .slot:hover, .booking .slot:focus-visible { background: #112250; color: #f1d79a; box-shadow: 0 0 0 1px #f1d79a, 0 0 14px rgba(224,197,143,.6); transform: translateY(-1px); }
+
+/* V4 série 3 : graphiques des résultats */
+.odo-window { display: inline-block; height: 1em; line-height: 1; overflow: hidden; }
+.odo-strip { display: flex; flex-direction: column; transform: translateY(0); transition: transform 2.2s cubic-bezier(.2,.8,.2,1); }
+.odo-strip > span { height: 1em; line-height: 1; }
+.reveal.is-in .odo-strip { transform: translateY(calc(var(--d) * -1em)); }
+.ring-fill { stroke-dasharray: 0 100; transition: stroke-dasharray 2.2s cubic-bezier(.2,.8,.2,1); filter: drop-shadow(0 0 4px rgba(241,215,154,.8)); }
+.reveal.is-in .ring-fill { stroke-dasharray: 100 0; }
+.pie-gold { stroke-dasharray: 0 100; transition: stroke-dasharray 1.8s cubic-bezier(.2,.8,.2,1) .3s; }
+.reveal.is-in .pie-gold { stroke-dasharray: 90 100; }
+.curve-line { stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 2.4s cubic-bezier(.4,0,.2,1) .2s; filter: drop-shadow(0 0 4px rgba(201,163,90,.7)); }
+.reveal.is-in .curve-line { stroke-dashoffset: 0; }
+.curve-area { opacity: 0; transition: opacity 1.2s ease 1.6s; }
+.reveal.is-in .curve-area { opacity: 1; }
+.curve-dot { opacity: 0; transform-origin: 220px 8px; transform: scale(0); transition: opacity .3s 2.5s, transform .5s cubic-bezier(.3,1.6,.5,1) 2.5s; }
+.reveal.is-in .curve-dot { opacity: 1; transform: scale(1); animation: dot-pulse 2s ease-in-out 3s infinite; }
+@keyframes dot-pulse { 50% { filter: drop-shadow(0 0 6px #f1d79a); } }
+.insta-followers b { position: relative; display: block; height: 1.25em; overflow: hidden; }
+.insta-followers .f-before, .insta-followers .f-after { display: block; transition: transform .7s cubic-bezier(.2,.8,.2,1) 1.2s, opacity .7s 1.2s; }
+.insta-followers .f-after { position: absolute; inset: 0; transform: translateY(100%); opacity: 0; color: #9a7634; }
+.reveal.is-in .insta-followers .f-before { transform: translateY(-100%); opacity: 0; }
+.reveal.is-in .insta-followers .f-after { transform: none; opacity: 1; }
+.stars-47 span { background: linear-gradient(90deg, #c9a35a 94%, rgba(17,34,80,.2) 94%); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: .12em; }
+
+/* V4 série 3 : néon doré ultra moderne — un tube de lumière qui court sur le contour au survol */
+@property --neon-a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.lift { position: relative; }
+.btn-accent::before, .glass-gold::before, .lift::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.6px; pointer-events: none; z-index: 2;
+  background: conic-gradient(from var(--neon-a), transparent 0 50%, rgba(201,163,90,.6) 60%, #fff6dc 72%, #f1d79a 78%, rgba(201,163,90,.6) 86%, transparent 94%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0; transition: opacity .35s ease;
+  filter: drop-shadow(0 0 3px #fff2cc) drop-shadow(0 0 8px rgba(241,215,154,.95)) drop-shadow(0 0 18px rgba(224,197,143,.6));
+}
+.btn-accent:hover::before, .btn-accent:focus-visible::before, .glass-gold:hover::before, .glass-gold:focus-visible::before, .lift:hover::before {
+  opacity: 1; animation: neon-spin 2.4s linear infinite;
+}
+@keyframes neon-spin { to { --neon-a: 360deg; } }
+.lift:hover { box-shadow: 0 0 0 1px rgba(241,215,154,.55), 0 0 22px rgba(224,197,143,.35), 0 26px 50px -24px rgba(224,197,143,.55); }
+@media (prefers-reduced-motion: reduce) { .btn-accent:hover::before, .glass-gold:hover::before, .lift:hover::before { animation: none; } }
+
+/* V4 série 3 : frise plus lisible */
+.timeline .tl-step { opacity: .55; }
+.timeline .tl-text { color: rgba(245,240,233,.88); }
+
+/* V4 série 3 : équipe en carrousel continu */
+.team-marquee { mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+.team-track { animation: team-scroll 48s linear infinite; }
+.team-marquee:hover .team-track { animation-play-state: paused; }
+@keyframes team-scroll { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .team-track { animation: none; } }
+.timeline .tl-step, .timeline .tl-step .tl-img { opacity: 1; transform: none; }
+.timeline .tl-text { color: #f5f0e9; text-shadow: 0 1px 12px rgba(4,8,20,.8); }
+.timeline .tl-text { background: rgba(6,12,32,.62); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); padding: .8rem 1rem; border-radius: 12px; border-left: 2px solid #c9a35a; }

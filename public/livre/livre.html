@@ -27,7 +27,7 @@
   .lightbox .frame { aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; background: #000; border: 1px solid rgba(224,197,143,.3); }
   .lightbox iframe { width: 100%; height: 100%; border: 0; }
   html.embed, html.embed body { background: transparent; }
-  .loading { position: fixed; inset: 0; display: grid; place-items: center; font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: rgba(224,197,143,.7); z-index: 4; pointer-events: none; transition: opacity .6s; }
+  .loading { position: fixed; inset: 0; display: grid; place-items: center; font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: rgba(224,197,143,.7); z-index: 4; pointer-events: none; transition: opacity .3s; }
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
 </head>
@@ -444,7 +444,7 @@ function woodTexture() {
   grain(ctx, 1024, 1024, 0.05, 60000);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2, 2); return t;
 }
-const table = new THREE.Mesh(new THREE.PlaneGeometry(14, 10), woodMaps());
+const table = new THREE.Mesh(new THREE.PlaneGeometry(14, 10), new THREE.MeshStandardMaterial({ color: 0x2a1d14, roughness: 0.7 }));
 table.position.z = -0.05; table.receiveShadow = true; scene.add(table);
 if (EMBED) { table.material = new THREE.ShadowMaterial({ opacity: 0.32 }); table.position.z = -0.2; }
 
@@ -568,7 +568,7 @@ const RAMP = 0.12, VMAX = 1 / (1 - RAMP);
 const ease = (t) => t < RAMP ? 0.5 * VMAX * t * t / RAMP : t > 1 - RAMP ? 1 - 0.5 * VMAX * (1 - t) * (1 - t) / RAMP : VMAX * (t - RAMP / 2);
 function goTo(target, dur) {
   target = Math.max(0, Math.min(SHEETS - 1, target));
-  if (target === page || sheets.some((s) => s.t < 1)) return;
+  if (target === page || target > sheets.length || sheets.some((s) => s.t < 1)) return;
   const dir = target > page ? 1 : -1, many = Math.abs(target - page) > 1;
   let k = 0;
   for (let i = dir > 0 ? page : page - 1; dir > 0 ? i < target : i >= target; i += dir, k++) {
@@ -583,7 +583,7 @@ function go(dir) {
   const target = page + dir;
   if (target < 0 || target > SHEETS - 1) return;
   const s = dir > 0 ? sheets[page] : sheets[page - 1];
-  if (s.t < 1) return;
+  if (!s || s.t < 1) return;
   s.from = s.p; s.to = dir > 0 ? 1 : 0; s.t = 0; s.dir = dir; s.delay = 0; s.dur = 1.45;
   page = target; updateUi();
 }
@@ -645,15 +645,29 @@ function resize() {
 addEventListener("resize", resize);
 
 // ───────────── Démarrage ─────────────
-await document.fonts.load("800 40px Poppins"); await document.fonts.load("500 20px Poppins"); await document.fonts.load("400 20px Poppins");
-images.logo = await loadImg("logo-mark.webp");
-await Promise.all(VIDEOS.map(async (v) => (images[v[0]] = await loadImg(`films/${v[0]}.webp`))));
+// Démarrage rapide : polices, logo et premières vignettes en parallèle ; la couverture s'affiche
+// tout de suite, les autres feuilles se construisent ensuite en arrière-plan.
+const firstIds = VIDEOS.slice(0, 2).map((v) => v[0]);
+await Promise.all([
+  document.fonts.load("800 40px Poppins"), document.fonts.load("500 20px Poppins"), document.fonts.load("400 20px Poppins"),
+  loadImg("logo-mark.webp").then((i) => (images.logo = i)),
+  ...firstIds.map((id) => loadImg(`films/${id}.webp`).then((i) => (images[id] = i))),
+]);
+const restImages = Promise.all(VIDEOS.slice(2).map(async (v) => (images[v[0]] = await loadImg(`films/${v[0]}.webp`))));
 paperBump = paperNormal();
 backBoard.material = leatherMaps(512, Math.round((512 * CH) / CW), false);
-for (let i = 0; i < SHEETS; i++) makeSheet(i, drawFace(i * 2), drawFace(i * 2 + 1));
+for (let i = 0; i < 2; i++) makeSheet(i, drawFace(i * 2), drawFace(i * 2 + 1));
 title.tex = sheets[0].g.children[1].material.map;
-const bois = await loadImg("bois.avif");
-if (bois && !EMBED) {
+(async () => {
+  await restImages;
+  for (let i = 2; i < SHEETS; i++) {
+    await new Promise((r) => setTimeout(r, 0)); // une feuille à la fois, sans bloquer l'affichage
+    makeSheet(i, drawFace(i * 2), drawFace(i * 2 + 1));
+    layout();
+  }
+})();
+const bois = EMBED ? null : await loadImg("bois.avif");
+if (bois) {
   const map = new THREE.Texture(bois); map.colorSpace = THREE.SRGBColorSpace; map.needsUpdate = true;
   const hc = document.createElement("canvas"); hc.width = Math.min(1024, bois.width); hc.height = Math.round(hc.width * bois.height / bois.width);
   const hx = hc.getContext("2d"); hx.filter = "grayscale(1)"; hx.drawImage(bois, 0, 0, hc.width, hc.height);
@@ -663,7 +677,7 @@ if (bois && !EMBED) {
   table.material = new THREE.MeshStandardMaterial({ map, normalMap: nrm, normalScale: new THREE.Vector2(0.5, 0.5), roughness: 0.6, metalness: 0, envMapIntensity: 0.3, color: 0x8c8c8c });
 }
 resize(); layout(); updateUi();
-document.getElementById("loading").style.opacity = 0;
+document.getElementById("loading").style.opacity = 0; window.__ready = performance.now();
 
 const clock = new THREE.Clock();
 let lightOpen = 0;

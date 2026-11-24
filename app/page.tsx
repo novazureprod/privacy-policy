@@ -7,6 +7,7 @@ import { VideoGallery } from "@/components/site/video-gallery"
 import { Reveal } from "@/components/site/reveal"
 import { StoryTimeline } from "@/components/site/story-timeline"
 import { Reviews } from "@/components/site/reviews"
+import { Team } from "@/components/site/team"
 import { ImpactDashboard } from "@/components/site/impact-dashboard"
 import { BookingCalendar } from "@/components/site/booking-calendar"
 import { NextSection } from "@/components/site/next-section"
@@ -114,6 +115,9 @@ export default function HomePage() {
       <div className="divider" aria-hidden="true"><span /></div>
 
       <StoryTimeline />
+      <NextSection href="#equipe" label="L'équipe" />
+
+      <Team />
       <NextSection href="#avis" label="Avis clients" />
 
       <Reviews />

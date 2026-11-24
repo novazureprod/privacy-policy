@@ -16,11 +16,16 @@ const COMMON = /* glsl */ `
   uniform float uZ;       // profondeur de la vague
   float crest(float x, float z, float t) {
     float s = x / uHalfW;
+    // Dunes : un creux profond au centre, une remontée ample à droite, et des ondulations
+    // irrégulières (fréquences sans rapport entre elles, décalées pour chaque vague).
+    float ph = uYOff * 3.7;
     return uYOff + uAmp * (
-        - 0.12 * (1.0 - s * s)              // creux doux et étiré au centre
-        + 0.45 * smoothstep(0.3, 1.1, s)    // remontée élégante sur le bord droit
-        + 0.035 * sin(1.6 * x + t * 0.30 + z)
-        + 0.012 * sin(4.1 * x - t * 0.25 + z * 1.7));
+        - 0.32 * exp(-pow((s + 0.05) * 1.35, 2.0))     // creux central marqué
+        + 0.62 * smoothstep(0.25, 1.15, s)             // remontée ample sur la droite
+        + 0.10 * (1.0 - smoothstep(-1.2, -0.4, s))     // léger rebord à gauche
+        + 0.075 * sin(0.9 * x + t * 0.22 + ph)
+        + 0.045 * sin(2.3 * x - t * 0.17 + ph * 1.9 + z)
+        + 0.015 * sin(5.1 * x + t * 0.31 + z * 1.7));
   }
 `
 
@@ -225,15 +230,15 @@ export function mountDustWaves(container: HTMLElement) {
   }
 
   // Vague lointaine, floue (milieu, au fond) ; vague principale, nette ; petite vague tout devant.
-  addWave({ yOff: 0.55, z: -2.2, amp: 1.1, body: 3600, sand: 0, depth: 0.6, line: 0, glow: 0.3 })
-  addWave({ yOff: -0.3, z: 0, amp: 1, body: 7000, sand: 4500, depth: 0.7, line: 28, glow: 1 })
-  addWave({ yOff: -0.82, z: 1.15, amp: 0.55, body: 1500, sand: 250, depth: 0.25, line: 0, glow: 0.35 })
+  addWave({ yOff: 0.55, z: -2.2, amp: 1.1, body: 2000, sand: 0, depth: 0.6, line: 0, glow: 0.3 })
+  addWave({ yOff: -0.25, z: 0, amp: 1, body: 3400, sand: 2600, depth: 0.7, line: 28, glow: 1 })
+  addWave({ yOff: -0.85, z: 1.15, amp: 0.6, body: 800, sand: 150, depth: 0.25, line: 0, glow: 0.35 })
 
   // Poussière libre qui flotte, et gros bokeh du premier plan
   {
     const uHalfW = { value: 2.5 }
     halfWs.push({ u: uHalfW, z: 0 })
-    const free = Math.round(450 * k)
+    const free = Math.round(380 * k)
     const bokeh = Math.round(160 * k)
     makePoints(free + bokeh, (put) => {
       for (let i = 0; i < free; i++) {

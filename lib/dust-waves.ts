@@ -124,7 +124,8 @@ const SILK_FRAG = /* glsl */ `
     float v = vUv.y;
     float sides = smoothstep(-1.2, -0.85, vS) * (1.0 - smoothstep(1.05, 1.2, vS));
     float line = uLine > 0.0 ? exp(-v * uLine) * 0.75 : 0.0;
-    float glow = line + exp(-v * 5.0) * 0.4 + exp(-v * 1.6) * 0.1;
+    // Voile de satin : bande bleue lumineuse sous la crête, qui se dissipe vers le bas.
+    float glow = line + exp(-v * 4.5) * 0.35 + exp(-v * 1.4) * 0.08;
     vec3 col = mix(vec3(0.16, 0.46, 1.0), vec3(1.0, 0.72, 0.26), smoothstep(0.15, 0.85, vS));
     float top = 1.0 - 0.9 * smoothstep(0.25, 0.45, vNdcY);
     gl_FragColor = vec4(col, glow * sides * uGlow * top);
@@ -199,7 +200,7 @@ export function mountDustWaves(container: HTMLElement) {
     makePoints(body + sand, (put) => {
       for (let i = 0; i < body; i++) {
         const s = span()
-        const d = Math.pow(Math.random(), 4) * wv.depth
+        const d = Math.pow(Math.random(), 5) * wv.depth
         const right = THREE.MathUtils.smoothstep(s, 0.1, 0.95)
         const goldChance = d > wv.depth * 0.25 ? 0.85 : 0.3 + right * 0.65
         put([s, d, (Math.random() - 0.5) * 0.2, Math.random()], Math.random() < goldChance ? pick(GOLD) : pick(BLUE), 0)
@@ -230,9 +231,9 @@ export function mountDustWaves(container: HTMLElement) {
   }
 
   // Vague lointaine, floue (milieu, au fond) ; vague principale, nette ; petite vague tout devant.
-  addWave({ yOff: 0.55, z: -2.2, amp: 1.1, body: 2000, sand: 0, depth: 0.6, line: 0, glow: 0.3 })
-  addWave({ yOff: -0.25, z: 0, amp: 1, body: 3400, sand: 2600, depth: 0.7, line: 28, glow: 1 })
-  addWave({ yOff: -0.85, z: 1.15, amp: 0.6, body: 800, sand: 150, depth: 0.25, line: 0, glow: 0.35 })
+  addWave({ yOff: 0.55, z: -2.2, amp: 1.1, body: 700, sand: 0, depth: 0.6, line: 0, glow: 0.4 })
+  addWave({ yOff: -0.25, z: 0, amp: 1.25, body: 3800, sand: 3200, depth: 1.0, line: 34, glow: 0.95 })
+  addWave({ yOff: -0.85, z: 1.15, amp: 0.6, body: 450, sand: 0, depth: 0.25, line: 0, glow: 0.5 })
 
   // Poussière libre qui flotte, et gros bokeh du premier plan
   {

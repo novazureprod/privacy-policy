@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="dark">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Livre portfolio Novazure</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,12 +26,14 @@
   .lightbox .top button { border: 1px solid rgba(224,197,143,.5); background: transparent; color: var(--gold); width: 42px; height: 42px; border-radius: 999px; font-size: 18px; cursor: pointer; }
   .lightbox .frame { aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; background: #000; border: 1px solid rgba(224,197,143,.3); }
   .lightbox iframe { width: 100%; height: 100%; border: 0; }
+  html.embed, html.embed body { background: transparent; }
   .loading { position: fixed; inset: 0; display: grid; place-items: center; font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: rgba(224,197,143,.7); z-index: 4; pointer-events: none; transition: opacity .6s; }
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
 </head>
 <body>
 <div id="scene" aria-label="Livre portfolio Novazure en 3D"></div>
+<script>if (new URLSearchParams(location.search).has("embed")) document.documentElement.classList.add("embed");</script>
 <div class="loading" id="loading">Ouverture du livre…</div>
 <p class="hint" id="hint">Cliquez sur la couverture pour ouvrir le livre</p>
 <div class="nav">
@@ -372,14 +375,16 @@ function paperNormal() {
 
 // ───────────── Scène three.js ─────────────
 const host = document.getElementById("scene");
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+// Mode intégré (?embed) : fond transparent, pas de table, le livre flotte au-dessus de la page.
+const EMBED = document.documentElement.classList.contains("embed");
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: EMBED });
 renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
 host.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
-scene.background = new THREE.Color("#050608");
+scene.background = EMBED ? null : new THREE.Color("#050608");
 const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 50);
 
 // Environnement de studio : donne de vrais reflets aux dorures et au cuir.
@@ -441,6 +446,7 @@ function woodTexture() {
 }
 const table = new THREE.Mesh(new THREE.PlaneGeometry(14, 10), woodMaps());
 table.position.z = -0.05; table.receiveShadow = true; scene.add(table);
+if (EMBED) { table.material = new THREE.ShadowMaterial({ opacity: 0.32 }); table.position.z = -0.2; }
 
 const book = new THREE.Group(); scene.add(book);
 const EPS = 0.0016; // épaisseur d'une feuille
@@ -647,7 +653,7 @@ backBoard.material = leatherMaps(512, Math.round((512 * CH) / CW), false);
 for (let i = 0; i < SHEETS; i++) makeSheet(i, drawFace(i * 2), drawFace(i * 2 + 1));
 title.tex = sheets[0].g.children[1].material.map;
 const bois = await loadImg("bois.avif");
-if (bois) {
+if (bois && !EMBED) {
   const map = new THREE.Texture(bois); map.colorSpace = THREE.SRGBColorSpace; map.needsUpdate = true;
   const hc = document.createElement("canvas"); hc.width = Math.min(1024, bois.width); hc.height = Math.round(hc.width * bois.height / bois.width);
   const hx = hc.getContext("2d"); hx.filter = "grayscale(1)"; hx.drawImage(bois, 0, 0, hc.width, hc.height);
@@ -679,6 +685,7 @@ renderer.setAnimationLoop(() => {
   bookX += (targetX - bookX) * Math.min(1, dt * 3);
   book.position.x = bookX;
   book.rotation.x = -0.04 + Math.sin(clock.elapsedTime * 0.4) * 0.004;
+  if (EMBED) { book.position.z = Math.sin(clock.elapsedTime * 0.7) * 0.012; book.rotation.y = Math.sin(clock.elapsedTime * 0.35) * 0.012; }
   const sw = (clock.elapsedTime % 7) / 7; // un passage toutes les 7 secondes
   sweep.position.x = -2.4 + sw * 4.8; sweep.position.y = 0.5 - sw * 0.9; sweep.intensity = Math.sin(sw * Math.PI) * (2.6 - 1 * lightOpen);
   renderer.render(scene, camera);

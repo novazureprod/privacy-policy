@@ -276,3 +276,28 @@ footer { border-top-color: rgba(224, 197, 143, 0.22) !important; }
     radial-gradient(ellipse 90% 40% at 50% 100%, rgba(30, 98, 208, 0.28), transparent 70%),
     linear-gradient(180deg, #020611 0%, #020611 35%, #06132b 100%);
 }
+
+/* V4 : verre crème. Les cartes et boutons en verre passent sur un fond blanc crème légèrement
+   texturé, avec un contour doré, pour alléger le bleu. Les couleurs de texte sont inversées à
+   l'intérieur (bleu nuit sur crème, or plus soutenu pour rester lisible). */
+.glass {
+  --nz-text: #112250;
+  --nz-muted: #3e4a6b;
+  --nz-gold: #9a7634;
+  --nz-gold-hover: #7f5f26;
+  color: var(--nz-text);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .25 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, rgba(250, 247, 241, 0.94), rgba(238, 230, 216, 0.9));
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid rgba(201, 163, 90, 0.75);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 18px 40px -22px rgba(0, 0, 0, 0.7);
+}
+.glass-gold:hover, .glass-gold:focus-visible {
+  border-color: #c9a35a;
+  box-shadow: 0 0 0 1px rgba(201, 163, 90, 0.55), 0 10px 30px -12px rgba(224, 197, 143, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.glass-gold::after { background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%); }
+.glass .metal-text { background: linear-gradient(180deg, #112250 0%, #1e3a8a 55%, #9a7634 100%); -webkit-background-clip: text; background-clip: text; }
+.glass .eyebrow::after { background: #c9a35a; }

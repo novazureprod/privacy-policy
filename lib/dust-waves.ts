@@ -14,6 +14,7 @@ const COMMON = /* glsl */ `
   uniform float uYOff;    // hauteur de la vague
   uniform float uAmp;     // force des courbes
   uniform float uZ;       // profondeur de la vague
+  uniform float uTilt;    // inclinaison en profondeur : le bout droit avance (positif) ou recule (négatif)
   float crest(float x, float z, float t) {
     float s = x / uHalfW;
     // Dunes : un creux profond au centre, une remontée ample à droite, et des ondulations
@@ -51,7 +52,7 @@ const VERT = /* glsl */ `
     vec3 p;
     if (uKind < 0.5) {
       // Les grains sous la crête descendent et se rapprochent de la caméra.
-      p = vec3(x, crest(x, z, t) - d, uZ + z + d * 1.2);
+      p = vec3(x, crest(x, z, t) - d, uZ + uTilt * (x / uHalfW) + z + d * 1.2);
     } else if (aLayer < 0.5) {
       // Poussière libre : monte lentement en boucle, avec un balancement aléatoire.
       float y = -1.75 + mod(d * 3.6 + t * (0.018 + w * 0.03), 3.6);
@@ -109,7 +110,7 @@ const SILK_VERT = /* glsl */ `
     vUv = uv;
     float x = position.x * uHalfW;
     vS = x / uHalfW;
-    vec3 p = vec3(x, crest(x, 0.0, uTime) - uv.y * 0.55 + 0.004, uZ + uv.y * 0.4);
+    vec3 p = vec3(x, crest(x, 0.0, uTime) - uv.y * 0.55 + 0.004, uZ + uTilt * vS + uv.y * 0.4);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
     vNdcY = gl_Position.y / gl_Position.w;
   }
@@ -122,7 +123,7 @@ const SILK_FRAG = /* glsl */ `
   varying float vNdcY;
   void main() {
     float v = vUv.y;
-    float sides = smoothstep(-1.2, -0.85, vS) * (1.0 - smoothstep(1.05, 1.2, vS));
+    float sides = smoothstep(-1.6, -1.2, vS) * (1.0 - smoothstep(1.4, 1.6, vS));
     float line = uLine > 0.0 ? exp(-v * uLine) * 0.75 : 0.0;
     // Voile de satin : bande bleue lumineuse sous la crête, qui se dissipe vers le bas.
     float glow = line + exp(-v * 4.5) * 0.35 + exp(-v * 1.4) * 0.08;
@@ -136,7 +137,7 @@ const GOLD = [new THREE.Color("#f59e0b"), new THREE.Color("#fbbf24"), new THREE.
 const BLUE = [new THREE.Color("#1e62d0"), new THREE.Color("#3b82f6")]
 const pick = (arr: THREE.Color[]) => arr[(Math.random() * arr.length) | 0]
 
-type Wave = { yOff: number; z: number; amp: number; body: number; sand: number; depth: number; line: number; glow: number }
+type Wave = { yOff: number; z: number; tilt: number; amp: number; body: number; sand: number; depth: number; line: number; glow: number }
 
 export function mountDustWaves(container: HTMLElement) {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -189,12 +190,13 @@ export function mountDustWaves(container: HTMLElement) {
     disposables.push(geo, mat)
   }
 
-  const span = () => (Math.random() * 2 - 1) * 1.15 // en fraction de demi-largeur d'écran
+  // En fraction de demi-largeur d'écran ; assez large pour qu'une vague inclinée déborde des deux bords.
+  const span = () => (Math.random() * 2 - 1) * 1.6
 
   const addWave = (wv: Wave) => {
     const uHalfW = { value: 2.5 }
     halfWs.push({ u: uHalfW, z: wv.z })
-    const u = { uHalfW, uYOff: { value: wv.yOff }, uAmp: { value: wv.amp }, uZ: { value: wv.z }, uKind: { value: 0 } }
+    const u = { uHalfW, uYOff: { value: wv.yOff }, uAmp: { value: wv.amp }, uZ: { value: wv.z }, uTilt: { value: wv.tilt }, uKind: { value: 0 } }
     const body = Math.round(wv.body * k)
     const sand = Math.round(wv.sand * k)
     makePoints(body + sand, (put) => {
@@ -212,7 +214,7 @@ export function mountDustWaves(container: HTMLElement) {
       }
     }, u)
     // Ruban de soie de cette vague
-    const silkGeo = new THREE.PlaneGeometry(2.4, 1, 260, 120)
+    const silkGeo = new THREE.PlaneGeometry(3.2, 1, 320, 120)
     silkGeo.translate(0, 0.5, 0) // uv.y = 0 sur la crête, 1 en bas
     const silkMat = new THREE.ShaderMaterial({
       vertexShader: SILK_VERT,
@@ -231,9 +233,9 @@ export function mountDustWaves(container: HTMLElement) {
   }
 
   // Vague lointaine, floue (milieu, au fond) ; vague principale, nette ; petite vague tout devant.
-  addWave({ yOff: 0.55, z: -2.2, amp: 1.1, body: 700, sand: 0, depth: 0.6, line: 0, glow: 0.4 })
-  addWave({ yOff: -0.25, z: 0, amp: 1.25, body: 3800, sand: 3200, depth: 1.0, line: 34, glow: 0.95 })
-  addWave({ yOff: -0.85, z: 1.15, amp: 0.6, body: 450, sand: 0, depth: 0.25, line: 0, glow: 0.5 })
+  addWave({ yOff: 0.55, z: -2.2, tilt: -0.9, amp: 1.1, body: 700, sand: 0, depth: 0.6, line: 0, glow: 0.4 })
+  addWave({ yOff: -0.25, z: 0, tilt: 1.1, amp: 1.25, body: 3800, sand: 3200, depth: 1.0, line: 34, glow: 0.95 })
+  addWave({ yOff: -0.85, z: 1.15, tilt: -0.6, amp: 0.6, body: 450, sand: 0, depth: 0.25, line: 0, glow: 0.5 })
 
   // Poussière libre qui flotte, et gros bokeh du premier plan
   {
@@ -249,7 +251,7 @@ export function mountDustWaves(container: HTMLElement) {
       for (let i = 0; i < bokeh; i++) {
         put([span() * 0.6, Math.random(), Math.random() * 0.8, Math.random()], Math.random() < 0.75 ? pick(GOLD) : pick(BLUE), 1)
       }
-    }, { uHalfW, uYOff: { value: 0 }, uAmp: { value: 1 }, uZ: { value: 0 }, uKind: { value: 1 } })
+    }, { uHalfW, uYOff: { value: 0 }, uAmp: { value: 1 }, uZ: { value: 0 }, uTilt: { value: 0 }, uKind: { value: 1 } })
   }
 
   const resize = () => {

@@ -4,7 +4,6 @@ import { Footer } from "@/components/site/footer"
 import { HomeHero } from "@/components/site/home-hero"
 import { BookPortfolio } from "@/components/site/book-portfolio"
 import { VideoGallery } from "@/components/site/video-gallery"
-import { NicheFolders } from "@/components/site/niche-folders"
 import { VideoGrid } from "@/components/site/video-grid"
 import { Reveal } from "@/components/site/reveal"
 import { Counter } from "@/components/site/counter"
@@ -84,19 +83,6 @@ export default function HomePage() {
             Toutes les réalisations
           </Link>
         </div>
-      </section>
-
-      <section id="activites" className="px-5 py-24 sm:px-10" aria-labelledby="titre-activites">
-        <Reveal className="text-center">
-          <p className="eyebrow">Votre activité</p>
-          <h2 id="titre-activites" className="metal-text mt-3 font-display text-3xl font-extrabold sm:text-5xl">
-            Sept univers, un même regard.
-          </h2>
-          <p className="mx-auto mt-4 max-w-lg text-sm text-[var(--nz-muted)]">
-            Ouvrez le dossier de votre activité pour voir ce que nous faisons pour vous.
-          </p>
-        </Reveal>
-        <NicheFolders />
       </section>
 
       <ClientsMarquee />

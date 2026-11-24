@@ -3,6 +3,7 @@ import { Header } from "@/components/site/header"
 import { Footer } from "@/components/site/footer"
 import { HomeHero } from "@/components/site/home-hero"
 import { BookPortfolio } from "@/components/site/book-portfolio"
+import { VideoGallery } from "@/components/site/video-gallery"
 import { NicheFolders } from "@/components/site/niche-folders"
 import { VideoGrid } from "@/components/site/video-grid"
 import { Reveal } from "@/components/site/reveal"
@@ -67,10 +68,17 @@ export default function HomePage() {
         <Reveal className="px-5 text-center">
           <p className="eyebrow">Nos réalisations</p>
           <h2 id="titre-realisations" className="metal-text mt-3 font-display text-3xl font-extrabold sm:text-5xl">
-            Feuilletez le portfolio.
+            <span className="hidden md:inline">Feuilletez le portfolio.</span>
+            <span className="md:hidden">Faites défiler la pellicule.</span>
           </h2>
         </Reveal>
-        <BookPortfolio />
+        {/* Ordinateur : livre 3D. Téléphone : pellicule. Chacun ne se charge que s'il est affiché. */}
+        <div className="hidden md:block">
+          <BookPortfolio />
+        </div>
+        <div className="md:hidden">
+          <VideoGallery />
+        </div>
         <div className="px-5 pt-10 pb-8 text-center">
           <Link href="/portfolio" className="glass glass-gold inline-block rounded-full px-8 py-3 font-sub text-xs tracking-[0.2em] uppercase">
             Toutes les réalisations

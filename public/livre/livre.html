@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Livre portfolio Novazure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --gold: #e0c58f; --ink: #050608; }
+  html, body { margin: 0; height: 100%; background: var(--ink); color: #f5f0e9; font-family: Poppins, system-ui, sans-serif; overflow: hidden; }
+  #scene { position: fixed; inset: 0; }
+  .nav { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); display: flex; align-items: center; gap: 18px; z-index: 5; }
+  .nav button { width: 52px; height: 52px; border-radius: 999px; border: 1px solid rgba(224,197,143,.45); background: rgba(10,14,24,.7); color: var(--gold); font-size: 22px; cursor: pointer; backdrop-filter: blur(8px); transition: transform .25s ease, background .25s ease, opacity .25s; }
+  .nav button:hover:not(:disabled) { transform: translateY(-2px); background: rgba(224,197,143,.16); }
+  .nav button:disabled { opacity: .3; cursor: default; }
+  .nav span { min-width: 120px; text-align: center; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: rgba(245,240,233,.75); }
+  .hint { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); font-size: 11px; letter-spacing: .25em; text-transform: uppercase; color: rgba(245,240,233,.45); z-index: 5; text-align: center; }
+  .lightbox { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.82); display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+  .lightbox.open { display: flex; }
+  .lightbox .box { width: min(1000px, 100%); }
+  .lightbox .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px; }
+  .lightbox .top p { margin: 0; font-weight: 600; }
+  .lightbox .top button { border: 1px solid rgba(224,197,143,.5); background: transparent; color: var(--gold); width: 42px; height: 42px; border-radius: 999px; font-size: 18px; cursor: pointer; }
+  .lightbox .frame { aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; background: #000; border: 1px solid rgba(224,197,143,.3); }
+  .lightbox iframe { width: 100%; height: 100%; border: 0; }
+  .loading { position: fixed; inset: 0; display: grid; place-items: center; font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: rgba(224,197,143,.7); z-index: 4; pointer-events: none; transition: opacity .6s; }
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="scene" aria-label="Livre portfolio Novazure en 3D"></div>
+<div class="loading" id="loading">Ouverture du livre…</div>
+<p class="hint" id="hint">Cliquez sur la couverture pour ouvrir le livre</p>
+<div class="nav">
+  <button id="prev" aria-label="Page précédente">‹</button>
+  <span id="count">Couverture</span>
+  <button id="next" aria-label="Page suivante">›</button>
+</div>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Lecture de la vidéo">
+  <div class="box">
+    <div class="top"><p id="lbTitle"></p><button id="lbClose" aria-label="Fermer la vidéo">✕</button></div>
+    <div class="frame"><iframe id="lbFrame" title="Vidéo" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from "three";
+
+// ───────────── Contenu du livre ─────────────
+const VIDEOS = [
+  ["REelqCfvayQ", "Roulotte du lac de Sainte-Croix", "Immobilier"],
+  ["CuymaOLmh4g", "Agence Boyer – Bandol", "Immobilier"],
+  ["81I7ZjSea4k", "Villa d'architecte, Sanary", "Immobilier"],
+  ["vfAhIxz4dsg", "Villa d'exception, Var", "Immobilier"],
+  ["1bZuWZWbQ2M", "Showtour 2025", "Immobilier"],
+  ["gj3GYJ9TNmc", "Vidéo immobilière et drone", "Immobilier"],
+  ["ucXhK4i0u-M", "Timelapse villa", "Immobilier"],
+  ["xjstJouBkw0", "Cap Canaille à Cassis", "Immobilier"],
+  ["WQEPIkpcCCM", "Teaser L&J – juin 2026", "Mariage"],
+  ["B2SCWc1xTyg", "Teaser J&C – mai 2026", "Mariage"],
+  ["m3k6rtkDQ9M", "Teaser A&D – mai 2025", "Mariage"],
+  ["rBkvInnpaS8", "Pourquoi filmer votre mariage", "Mariage"],
+  ["D47ijCVV8s4", "Domaine Astra", "Domaines de mariage"],
+  ["d-FN7cHAfos", "Domaine de la Pommée", "Domaines de mariage"],
+  ["TevdZq2GGI0", "Domaine de la Toussane", "Domaines de mariage"],
+  ["2zS5lJnR3WQ", "Restaurant Les 2 Sœurs", "Restaurants"],
+  ["sfRZxRNz7xc", "Bières du Monde", "Restaurants"],
+  ["1dzJABebjl0", "Restaurant Wok 83", "Restaurants"],
+  ["7G_h-Qu7LUI", "Chaîne humaine, tombolo de Hyères", "Associations"],
+  ["mmqL9GzWYC0", "Forum des associations", "Associations"],
+  ["XjjGsIawjPE", "Aftermovie Festival Festic", "Associations"],
+  ["_L4_nintiIA", "École de cirque Pitrerie", "Sociétés"],
+  ["ShdGc_cOh7Q", "Helios Spa", "Sociétés"],
+  ["Cwt52xlHZZ4", "Conciergerie DMP Excellence", "Sociétés"],
+  ["OV3lPHHe0ZU", "L'histoire de Novazure", "Sociétés"],
+  ["su4XqYeRDyQ", "Introduction à Novazure", "Sociétés"],
+];
+const CATS = [...new Set(VIDEOS.map((v) => v[2]))];
+
+// Faces dans l'ordre de lecture. Une feuille = recto (face paire) + verso (face impaire).
+const faces = [{ type: "cover" }, { type: "title" }];
+for (const v of VIDEOS) faces.push({ type: "video", id: v[0], title: v[1], cat: v[2] });
+faces.push({ type: "end" });
+if (faces.length % 2) faces.push({ type: "blank" });
+const SHEETS = faces.length / 2; // feuille 0 = couverture rigide
+
+// ───────────── Dessin des pages (canvas) ─────────────
+const PW = 1, PH = 1.12;                 // taille d'une page dans la scène
+const TW = 760, TH = Math.round(TW * PH); // taille des textures
+const images = {};
+const loadImg = (src) => new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+
+function grain(ctx, w, h, alpha, n) {
+  for (let i = 0; i < n; i++) {
+    ctx.fillStyle = Math.random() < 0.5 ? `rgba(255,255,255,${alpha})` : `rgba(0,0,0,${alpha * 1.4})`;
+    ctx.fillRect(Math.random() * w, Math.random() * h, 1.2, 1.2);
+  }
+}
+function goldGrad(ctx, x0, y0, x1, y1) {
+  const g = ctx.createLinearGradient(x0, y0, x1, y1);
+  g.addColorStop(0, "#9c7a3c"); g.addColorStop(0.35, "#f1d79a"); g.addColorStop(0.6, "#c9a35a"); g.addColorStop(1, "#f6e2ad");
+  return g;
+}
+// Ornement d'angle : volutes, feuilles et spirales dorées.
+function corner(ctx, x, y, sx, sy, s, color) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(sx * s, sy * s);
+  ctx.strokeStyle = color || goldGrad(ctx, 0, 0, 120, 120); ctx.fillStyle = ctx.strokeStyle; ctx.lineWidth = 2.2; ctx.lineCap = "round";
+  const spiral = (cx, cy, r, turns, dir) => { ctx.beginPath(); for (let a = 0; a < turns * Math.PI * 2; a += 0.15) { const rr = r * (1 - a / (turns * Math.PI * 2)); const px = cx + Math.cos(a * dir) * rr, py = cy + Math.sin(a * dir) * rr; a ? ctx.lineTo(px, py) : ctx.moveTo(px, py); } ctx.stroke(); };
+  const leaf = (x0, y0, x1, y1, bend) => { ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo((x0 + x1) / 2 + bend, (y0 + y1) / 2 - bend, x1, y1); ctx.quadraticCurveTo((x0 + x1) / 2 - bend * 0.3, (y0 + y1) / 2 + bend * 0.3, x0, y0); ctx.fill(); };
+  ctx.beginPath(); ctx.moveTo(4, 120); ctx.bezierCurveTo(4, 60, 20, 20, 60, 10); ctx.bezierCurveTo(90, 4, 110, 6, 128, 4); ctx.stroke();
+  spiral(40, 44, 18, 1.3, 1); spiral(78, 22, 11, 1.2, -1); spiral(22, 82, 11, 1.2, -1);
+  leaf(52, 30, 96, 40, 10); leaf(30, 52, 40, 96, -10); leaf(14, 14, 34, 34, 6);
+  ctx.beginPath(); ctx.arc(10, 10, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+function frame(ctx, w, h, inset, cornerColor) {
+  ctx.strokeStyle = goldGrad(ctx, 0, 0, w, h);
+  ctx.lineWidth = 1.8; ctx.strokeRect(inset, inset, w - inset * 2, h - inset * 2);
+  ctx.lineWidth = 0.9; ctx.strokeRect(inset + 9, inset + 9, w - inset * 2 - 18, h - inset * 2 - 18);
+  const c = inset + 16, s = w / 760;
+  corner(ctx, c, c, 1, 1, s, cornerColor); corner(ctx, w - c, c, -1, 1, s, cornerColor); corner(ctx, c, h - c, 1, -1, s, cornerColor); corner(ctx, w - c, h - c, -1, -1, s, cornerColor);
+}
+function paper(ctx, w, h) {
+  // Papier magazine blanc cassé : grain fin, quelques fibres, léger assombrissement sur les bords.
+  const g = ctx.createLinearGradient(0, 0, w, h);
+  g.addColorStop(0, "#f3efe6"); g.addColorStop(1, "#e9e2d5");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+  grain(ctx, w, h, 0.018, 30000);
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < 160; i++) {
+    const x = Math.random() * w, y = Math.random() * h, a = Math.random() * Math.PI;
+    ctx.strokeStyle = `rgba(120,100,70,${0.04 + Math.random() * 0.05})`;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * 8, y + Math.sin(a) * 8); ctx.stroke();
+  }
+  const v = ctx.createRadialGradient(w / 2, h / 2, w * 0.35, w / 2, h / 2, w * 0.85);
+  v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(60,45,20,.10)");
+  ctx.fillStyle = v; ctx.fillRect(0, 0, w, h);
+}
+function leather(ctx, w, h) {
+  const g = ctx.createLinearGradient(0, 0, w, h);
+  g.addColorStop(0, "#28479e"); g.addColorStop(1, "#1a3378");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+  // Craquelures du cuir
+  ctx.lineWidth = 0.8;
+  for (let i = 0; i < 900; i++) {
+    let x = Math.random() * w, y = Math.random() * h;
+    ctx.strokeStyle = `rgba(5,10,30,${0.08 + Math.random() * 0.12})`;
+    ctx.beginPath(); ctx.moveTo(x, y);
+    for (let k = 0; k < 6; k++) { x += (Math.random() - 0.5) * 30; y += (Math.random() - 0.5) * 30; ctx.lineTo(x, y); }
+    ctx.stroke();
+  }
+  grain(ctx, w, h, 0.05, 30000);
+}
+function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+function pill(ctx, text, cx, cy, size) {
+  ctx.font = `500 ${size}px Poppins`;
+  const tw = ctx.measureText(text).width, ph = size * 1.75, pw = tw + size * 2.2;
+  const sg = ctx.createLinearGradient(cx - pw / 2, cy, cx + pw / 2, cy);
+  sg.addColorStop(0, "#bf9d5c"); sg.addColorStop(0.45, "#e2c894"); sg.addColorStop(1, "#c9a96b");
+  ctx.fillStyle = sg;
+  roundRect(ctx, cx - pw / 2, cy - ph / 2, pw, ph, ph / 2); ctx.fill();
+  ctx.fillStyle = "#13224f"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(text, cx, cy + 1);
+}
+function fitText(ctx, text, max, size, weight) {
+  let s = size; ctx.font = `${weight} ${s}px Poppins`;
+  while (ctx.measureText(text).width > max && s > 10) { s -= 1; ctx.font = `${weight} ${s}px Poppins`; }
+  return s;
+}
+
+// Zones cliquables, en coordonnées de texture (0..1, origine en haut à gauche)
+const hits = {};
+
+// Sommaire : chaque catégorie s'éclaire au survol et mène à ses pages.
+const catHover = CATS.map(() => 0), catHits = [];
+let hoverCat = -1, title = null;
+function drawCats() {
+  const { canvas: c, base, ox, oy } = title, x = c.getContext("2d"), W = TW, H = TH;
+  x.drawImage(base, 0, 0);
+  x.textAlign = "center"; x.textBaseline = "alphabetic";
+  catHits.length = 0;
+  CATS.forEach((cat, k) => {
+    const p = catHover[k], e = p * p * (3 - 2 * p);
+    const y = oy + H * 0.64 + k * H * 0.056, cx = ox + W / 2;
+    x.font = `${p > 0.5 ? 500 : 400} ${W * 0.046}px Poppins`;
+    const tw = x.measureText(cat).width;
+    // Texte : bleu nuit qui se teinte d'or
+    const mix = (a, b) => Math.round(a + (b - a) * e);
+    x.fillStyle = `rgb(${mix(28, 168)},${mix(43, 133)},${mix(90, 63)})`;
+    x.fillText(cat, cx + e * W * 0.012, y);
+    // Pastille dorée qui grossit
+    x.fillStyle = "#c9a35a"; x.beginPath(); x.arc(cx - tw / 2 - W * 0.04 + e * W * 0.006, y - W * 0.014, W * 0.008 * (1 + e * 0.6), 0, Math.PI * 2); x.fill();
+    // Filet doré qui se dessine sous le mot
+    if (e > 0.01) { x.strokeStyle = goldGrad(x, cx - tw / 2, y, cx + tw / 2, y); x.lineWidth = 2; x.beginPath(); x.moveTo(cx - (tw / 2) * e + e * W * 0.012, y + W * 0.014); x.lineTo(cx + (tw / 2) * e + e * W * 0.012, y + W * 0.014); x.stroke(); }
+    catHits.push({ k, x0: (cx - tw / 2 - W * 0.07) / c.width, x1: (cx + tw / 2 + W * 0.04) / c.width, y0: (y - W * 0.05) / c.height, y1: (y + W * 0.02) / c.height });
+  });
+  if (title.tex) title.tex.needsUpdate = true;
+}
+function drawFace(i) {
+  if (i === 1) {
+    const inner = drawFaceRaw(1);
+    const W2 = Math.round((TW * CW) / PW), H2 = Math.round((TH * CH) / PH);
+    const c = document.createElement("canvas"); c.width = W2; c.height = H2; const x = c.getContext("2d");
+    const g = x.createLinearGradient(0, 0, W2, H2); g.addColorStop(0, "#2a4a9f"); g.addColorStop(1, "#1b357c");
+    x.fillStyle = g; x.fillRect(0, 0, W2, H2); grain(x, W2, H2, 0.04, 20000);
+    // Le bord extérieur est à gauche sur cette face : la page est calée contre la reliure (à droite).
+    x.drawImage(inner.canvas, W2 - TW, (H2 - TH) / 2);
+    const base = document.createElement("canvas"); base.width = W2; base.height = H2; base.getContext("2d").drawImage(c, 0, 0);
+    title = { canvas: c, base, ox: W2 - TW, oy: (H2 - TH) / 2, tex: null };
+    drawCats();
+    return finishFace(-1, c);
+  }
+  return drawFaceRaw(i);
+}
+function drawFaceRaw(i) {
+  const f = faces[i];
+  const c = document.createElement("canvas"); c.width = TW; c.height = TH;
+  const ctx = c.getContext("2d");
+  const W = TW, H = TH;
+  ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+  if (f.type === "cover") {
+    leather(ctx, W, H); frame(ctx, W, H, W * 0.07);
+    if (images.logo) { const s = W * 0.36; ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = 18; ctx.drawImage(images.logo, W / 2 - s / 2, H / 2 - s * 0.53, s, s * 1.06); ctx.shadowBlur = 0; }
+    return { canvas: c, bump: true };
+  }
+  paper(ctx, W, H); frame(ctx, W, H, W * 0.075, "#1c2b5a");
+  if (f.type === "title") {
+    if (images.logo) { const s = W * 0.28; ctx.drawImage(images.logo, W / 2 - s / 2, H * 0.15, s, s * 1.06); }
+    ctx.fillStyle = "#1c2b5a"; ctx.font = `500 ${W * 0.03}px Poppins`;
+    ctx.letterSpacing = "4px"; ctx.fillText("PAR LOUANN MASTROVITO", W / 2, H * 0.52); ctx.letterSpacing = "0px";
+    // Les catégories sont dessinées à part (drawCats) pour réagir au survol.
+  } else if (f.type === "video") {
+    const s = fitText(ctx, f.cat.toUpperCase(), W * 0.72, W * 0.085, 500);
+    ctx.fillStyle = "#13224f"; ctx.letterSpacing = "2px"; ctx.fillText(f.cat.toUpperCase(), W / 2, H * 0.23); ctx.letterSpacing = "0px";
+    const tw = W * 0.74, th = tw * 9 / 16, tx = (W - tw) / 2, ty = H * 0.33;
+    // Halo blanc doux autour de la vignette, comme une photo glissée sous un calque
+    ctx.save(); ctx.shadowColor = "rgba(30,25,15,.35)"; ctx.shadowBlur = 22; ctx.shadowOffsetY = 6; ctx.fillStyle = "#ffffff"; roundRect(ctx, tx, ty, tw, th, 22); ctx.fill(); ctx.restore();
+    const img = images[f.id];
+    ctx.save(); roundRect(ctx, tx, ty, tw, th, 22); ctx.clip();
+    if (img) { const r = Math.max(tw / img.width, th / img.height); ctx.drawImage(img, tx + (tw - img.width * r) / 2, ty + (th - img.height * r) / 2, img.width * r, img.height * r); }
+    const sheen = ctx.createLinearGradient(tx, ty, tx + tw, ty + th);
+    sheen.addColorStop(0, "rgba(255,255,255,.18)"); sheen.addColorStop(0.5, "rgba(255,255,255,0)"); sheen.addColorStop(1, "rgba(255,255,255,.08)");
+    ctx.fillStyle = sheen; ctx.fillRect(tx, ty, tw, th);
+    ctx.restore();
+    // Bouton lecture
+    ctx.fillStyle = "rgba(10,14,30,.55)"; ctx.beginPath(); ctx.arc(W / 2, ty + th / 2, W * 0.06, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "rgba(224,197,143,.9)"; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = "#f5efe3"; ctx.beginPath(); ctx.moveTo(W / 2 - W * 0.018, ty + th / 2 - W * 0.028); ctx.lineTo(W / 2 + W * 0.03, ty + th / 2); ctx.lineTo(W / 2 - W * 0.018, ty + th / 2 + W * 0.028); ctx.fill();
+    pill(ctx, f.title, W / 2, H * 0.8, fitText(ctx, f.title, W * 0.6, W * 0.04, 500));
+    hits[i] = { x0: tx / W, y0: ty / H, x1: (tx + tw) / W, y1: (ty + th) / H, id: f.id, title: f.title };
+    void s;
+  } else if (f.type === "end") {
+    ctx.fillStyle = "#13224f"; ctx.font = `800 ${W * 0.11}px Poppins`; ctx.fillText("Merci", W / 2, H * 0.42);
+    ctx.fillStyle = "#a8853f"; ctx.font = `500 ${W * 0.036}px Poppins`; ctx.fillText("Votre histoire, en mouvement.", W / 2, H * 0.5);
+    pill(ctx, "Prendre rendez-vous", W / 2, H * 0.64, W * 0.038);
+  } else if (images.logo) {
+    ctx.globalAlpha = 0.18; const s = W * 0.3; ctx.drawImage(images.logo, W / 2 - s / 2, H / 2 - s * 0.53, s, s * 1.06); ctx.globalAlpha = 1;
+  }
+  return finishFace(i, c);
+}
+
+// Repère l'or dans la page (pixels chauds et saturés) pour le rendre métallique.
+// La vignette vidéo est exclue : ses couleurs chaudes ne doivent pas briller comme de l'or.
+function finishFace(i, c) {
+  const w = c.width >> 1, h = c.height >> 1;
+  const m = document.createElement("canvas"); m.width = w; m.height = h; const mx = m.getContext("2d");
+  mx.drawImage(c, 0, 0, w, h);
+  const d = mx.getImageData(0, 0, w, h), a = d.data;
+  for (let k = 0; k < a.length; k += 4) {
+    const r = a[k], g = a[k + 1], b = a[k + 2];
+    const gold = r > 120 && r - b > 55 && g - b > 25 ? Math.min(255, (r - b - 40) * 3) : 0;
+    a[k] = a[k + 1] = a[k + 2] = gold; a[k + 3] = 255;
+  }
+  mx.putImageData(d, 0, 0);
+  const hz = hits[i];
+  if (hz) { mx.fillStyle = "#000"; mx.fillRect(hz.x0 * w - 4, hz.y0 * h - 4, (hz.x1 - hz.x0) * w + 8, (hz.y1 - hz.y0) * h + 8); }
+  return { canvas: c, gold: m };
+}
+
+// ───────────── Cuir brut de la couverture ─────────────
+// Bruit à plusieurs échelles (grain du cuir) et plis → carte de relief → normales.
+// Les dorures (cadre, ornements) et le logo sont métalliques et brillants, le logo en léger relief.
+function noiseLayer(w, h, cell) {
+  const c = document.createElement("canvas"); c.width = Math.ceil(w / cell); c.height = Math.ceil(h / cell);
+  const x = c.getContext("2d"), d = x.createImageData(c.width, c.height);
+  for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+  x.putImageData(d, 0, 0); return c;
+}
+function heightToNormal(hc, strength) {
+  const w = hc.width, h = hc.height, hd = hc.getContext("2d").getImageData(0, 0, w, h).data;
+  const nc = document.createElement("canvas"); nc.width = w; nc.height = h; const nx = nc.getContext("2d"); const nd = nx.createImageData(w, h);
+  const H = (x, y) => hd[(((y + h) % h) * w + ((x + w) % w)) * 4] / 255;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const dx = (H(x + 1, y) - H(x - 1, y)) * strength, dy = (H(x, y + 1) - H(x, y - 1)) * strength;
+    const l = Math.hypot(dx, dy, 1), i = (y * w + x) * 4;
+    nd.data[i] = (-dx / l * 0.5 + 0.5) * 255; nd.data[i + 1] = (dy / l * 0.5 + 0.5) * 255; nd.data[i + 2] = (1 / l * 0.5 + 0.5) * 255; nd.data[i + 3] = 255;
+  }
+  nx.putImageData(nd, 0, 0); return nc;
+}
+function leatherMaps(w, h, withLogo) {
+  const canvas = () => { const c = document.createElement("canvas"); c.width = w; c.height = h; return [c, c.getContext("2d")]; };
+  const inset = w * 0.07, s = w / 760, cc0 = inset + 16;
+  const logoBox = [w / 2 - w * 0.19, h / 2 - w * 0.27, w * 0.38, w * 0.4];
+  const word = (ctx, fill) => { if (!withLogo) return; ctx.save(); ctx.font = `800 ${w * 0.1}px Poppins`; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillStyle = fill; ctx.fillText("Portfolio", w / 2, h / 2 + w * 0.26); ctx.restore(); };
+  const lines = (ctx, col) => {
+    ctx.strokeStyle = col; ctx.lineWidth = 2.6 * s; ctx.strokeRect(inset, inset, w - inset * 2, h - inset * 2);
+    ctx.lineWidth = 1.2 * s; ctx.strokeRect(inset + 9 * s, inset + 9 * s, w - inset * 2 - 18 * s, h - inset * 2 - 18 * s);
+  };
+  const corners = (ctx) => { corner(ctx, cc0, cc0, 1, 1, s); corner(ctx, w - cc0, cc0, -1, 1, s); corner(ctx, cc0, h - cc0, 1, -1, s); corner(ctx, w - cc0, h - cc0, -1, -1, s); };
+  // Masque des dorures (blanc = or)
+  const [gm, gx] = canvas(); gx.fillStyle = "#000"; gx.fillRect(0, 0, w, h);
+  lines(gx, "#fff"); gx.save(); gx.filter = "brightness(0) invert(1)"; corners(gx); gx.restore(); word(gx, "#fff");
+
+  // Relief : grain, ondulations, plis ; dorures gravées en creux ; logo frappé en relief
+  const [hc, hx] = canvas();
+  hx.fillStyle = "#808080"; hx.fillRect(0, 0, w, h);
+  [[3, 0.22], [10, 0.24], [40, 0.22], [120, 0.18]].forEach(([cell, a]) => { hx.globalAlpha = a; hx.drawImage(noiseLayer(w, h, cell), 0, 0, w, h); });
+  hx.globalAlpha = 1;
+  for (let i = 0; i < 35; i++) {
+    let x = Math.random() * w, y = Math.random() * h;
+    hx.strokeStyle = `rgba(0,0,0,${0.05 + Math.random() * 0.08})`; hx.lineWidth = 1 + Math.random() * 2;
+    hx.beginPath(); hx.moveTo(x, y); for (let k = 0; k < 8; k++) { x += (Math.random() - 0.5) * 40; y += (Math.random() - 0.5) * 40; hx.lineTo(x, y); } hx.stroke();
+  }
+  hx.save(); hx.globalCompositeOperation = "multiply"; hx.globalAlpha = 0.6; hx.drawImage(gm, 0, 0); hx.restore();
+  hx.save(); hx.globalAlpha = 0.5; hx.filter = "invert(1)"; hx.globalCompositeOperation = "multiply"; hx.drawImage(gm, 0, 0); hx.restore();
+  if (withLogo && images.logo) {
+    hx.save(); hx.filter = "brightness(0) invert(1) blur(4px)"; hx.globalAlpha = 0.6; hx.drawImage(images.logo, ...logoBox); hx.restore();
+    hx.save(); hx.filter = "grayscale(1) brightness(1.3)"; hx.globalAlpha = 0.45; hx.drawImage(images.logo, ...logoBox); hx.restore();
+  }
+  hx.save(); hx.filter = "blur(2px)"; hx.globalAlpha = 0.55; word(hx, "#fff"); hx.restore();
+  hx.filter = "blur(1px)"; hx.drawImage(hc, 0, 0); hx.filter = "none";
+  const nc = heightToNormal(hc, 2);
+
+  // Couleur : bleu cuir, plus sombre dans le grain, patine sur les reliefs ; dorures et logo
+  const [cc, cx] = canvas();
+  const g = cx.createLinearGradient(0, 0, w, h); g.addColorStop(0, "#2d4ea8"); g.addColorStop(1, "#1c377f");
+  cx.fillStyle = g; cx.fillRect(0, 0, w, h);
+  cx.save(); cx.globalCompositeOperation = "multiply"; cx.globalAlpha = 0.36; cx.drawImage(hc, 0, 0); cx.restore();
+  cx.save(); cx.globalCompositeOperation = "soft-light"; cx.globalAlpha = 0.42; cx.drawImage(noiseLayer(w, h, 90), 0, 0, w, h); cx.restore();
+  lines(cx, goldGrad(cx, 0, 0, w, h)); corners(cx); word(cx, goldGrad(cx, w * 0.3, 0, w * 0.7, 0));
+  if (withLogo && images.logo) cx.drawImage(images.logo, ...logoBox);
+
+  // Brillance : cuir mat et irrégulier, dorures brillantes ; métal : dorures et cercle du logo
+  const [rc, rx] = canvas();
+  rx.fillStyle = "#a0a0a0"; rx.fillRect(0, 0, w, h); rx.save(); rx.globalAlpha = 0.18; rx.drawImage(hc, 0, 0); rx.restore();
+  rx.save(); rx.globalCompositeOperation = "multiply"; rx.filter = "invert(1)"; rx.globalAlpha = 0.75; rx.drawImage(gm, 0, 0); rx.restore();
+  const [mc, mx] = canvas(); mx.drawImage(gm, 0, 0);
+  if (withLogo && images.logo) {
+    // Or du logo : pixels chauds (rouge > bleu) ; le phénix bleu reste non métallique
+    const t = document.createElement("canvas"); t.width = logoBox[2]; t.height = logoBox[3];
+    const tx = t.getContext("2d"); tx.drawImage(images.logo, 0, 0, t.width, t.height);
+    const d = tx.getImageData(0, 0, t.width, t.height);
+    for (let i = 0; i < d.data.length; i += 4) { const gold = d.data[i + 3] > 40 && d.data[i] > d.data[i + 2] + 40 ? 255 : 0; d.data[i] = d.data[i + 1] = d.data[i + 2] = gold; d.data[i + 3] = d.data[i + 3] > 40 ? 255 : 0; }
+    tx.putImageData(d, 0, 0);
+    mx.drawImage(t, logoBox[0], logoBox[1]);
+    rx.save(); rx.globalCompositeOperation = "multiply"; rx.filter = "invert(1)"; rx.globalAlpha = 0.6; rx.drawImage(t, logoBox[0], logoBox[1]); rx.restore();
+  }
+  const tex = (cv, srgb) => { const tt = new THREE.CanvasTexture(cv); if (srgb) tt.colorSpace = THREE.SRGBColorSpace; tt.anisotropy = 8; return tt; };
+  return new THREE.MeshStandardMaterial({
+    map: tex(cc, true), normalMap: tex(nc), normalScale: new THREE.Vector2(0.85, 0.85),
+    roughnessMap: tex(rc), roughness: 1, metalnessMap: tex(mc), metalness: 1,
+  });
+}
+// Relief commun à toutes les pages : grain très fin du papier satiné
+function paperNormal() {
+  const c = document.createElement("canvas"); c.width = c.height = 512; const x = c.getContext("2d");
+  x.fillStyle = "#808080"; x.fillRect(0, 0, 512, 512);
+  [[2, 0.5], [6, 0.3]].forEach(([cell, a]) => { x.globalAlpha = a; x.drawImage(noiseLayer(512, 512, cell), 0, 0, 512, 512); });
+  const t = new THREE.CanvasTexture(heightToNormal(c, 0.8)); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 3); return t;
+}
+
+// ───────────── Scène three.js ─────────────
+const host = document.getElementById("scene");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+host.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color("#050608");
+const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 50);
+
+// Environnement de studio : donne de vrais reflets aux dorures et au cuir.
+{
+  const { RoomEnvironment } = await import("https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/environments/RoomEnvironment.js");
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environmentIntensity = 0.35;
+}
+// Lumières : douce ambiance froide, lumière principale chaude et rasante qui fait vivre le papier.
+scene.add(new THREE.HemisphereLight(0x9fb4ff, 0x14100a, 0.55));
+const key = new THREE.DirectionalLight(0xfff1dc, 2.4);
+key.position.set(-1.4, 1.6, 3.2); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048); key.shadow.camera.left = -2.4; key.shadow.camera.right = 2.4; key.shadow.camera.top = 2; key.shadow.camera.bottom = -2;
+key.shadow.bias = -0.0004; key.shadow.radius = 6;
+scene.add(key);
+const fill = new THREE.PointLight(0xe0c58f, 0.6, 8); fill.position.set(2, -1.5, 2); scene.add(fill);
+// Lumière qui balaie le livre en douceur : les dorures et le logo s'allument au passage.
+const sweep = new THREE.PointLight(0xfff0d0, 2.2, 3.2, 1.6); sweep.position.set(-2, 0.3, 0.9); scene.add(sweep);
+
+// Table en bois sombre : planches, veines ondulées et nœuds, avec relief.
+function woodMaps() {
+  const N = 2048, c = document.createElement("canvas"); c.width = c.height = N; const x = c.getContext("2d");
+  // Bruit lent (déforme les veines) et bruit fin (pores du bois), séparés
+  const mk = (cells) => { const z = document.createElement("canvas"); z.width = z.height = N; const zx = z.getContext("2d"); zx.fillStyle = "#808080"; zx.fillRect(0, 0, N, N); cells.forEach(([cell, a, sx]) => { zx.globalAlpha = a; zx.drawImage(noiseLayer(N * sx, N, cell), 0, 0, N, N); }); return zx.getImageData(0, 0, N, N).data; };
+  const nd = mk([[160, 0.6, 1], [60, 0.3, 1]]);
+  const fd = mk([[2, 0.5, 6], [6, 0.3, 4]]); // étiré en longueur : fibres
+  const img = x.createImageData(N, N), d = img.data;
+  const planks = 5, ph = N / planks, seeds = Array.from({ length: planks }, () => [Math.random() * 100, 0.8 + Math.random() * 0.35]);
+  for (let py = 0; py < N; py++) {
+    const pl = Math.min(planks - 1, Math.floor(py / ph)), [sd, tone] = seeds[pl], ly = py - pl * ph;
+    for (let px = 0; px < N; px++) {
+      const i = (py * N + px) * 4, n = nd[i] / 255 - 0.5, f = fd[i] / 255 - 0.5;
+      // Veines : longues lignes presque horizontales, doucement ondulées
+      const v = Math.sin((ly + n * 90 + Math.sin(px * 0.0016 + sd) * 26) * 0.06 + sd);
+      let k = 0.45 + 0.22 * v + f * 0.35 + n * 0.2;
+      if (ly < 3 || ly > ph - 3) k *= 0.2; // joint entre deux planches
+      k = Math.max(0, Math.min(1, k)) * tone;
+      d[i] = 16 + k * 40; d[i + 1] = 11 + k * 26; d[i + 2] = 8 + k * 16; d[i + 3] = 255;
+    }
+  }
+  x.putImageData(img, 0, 0);
+  const map = new THREE.CanvasTexture(c); map.colorSpace = THREE.SRGBColorSpace;
+  const nrm = new THREE.CanvasTexture(heightToNormal(c, 2.5));
+  [map, nrm].forEach((t) => { t.wrapS = t.wrapT = THREE.MirroredRepeatWrapping; t.repeat.set(1.4, 1.4); t.anisotropy = 8; });
+  return new THREE.MeshStandardMaterial({ map, normalMap: nrm, normalScale: new THREE.Vector2(0.6, 0.6), roughness: 0.62, metalness: 0, envMapIntensity: 0.4 });
+}
+function woodTexture() {
+  const c = document.createElement("canvas"); c.width = 1024; c.height = 1024; const ctx = c.getContext("2d");
+  ctx.fillStyle = "#16130f"; ctx.fillRect(0, 0, 1024, 1024);
+  for (let i = 0; i < 260; i++) {
+    const y = Math.random() * 1024; ctx.strokeStyle = `rgba(${40 + Math.random() * 30},${34 + Math.random() * 20},${28},${0.25 + Math.random() * 0.35})`;
+    ctx.lineWidth = 0.6 + Math.random() * 2.4; ctx.beginPath(); ctx.moveTo(0, y);
+    for (let x = 0; x <= 1024; x += 32) ctx.lineTo(x, y + Math.sin(x / 90 + i) * 4 + (Math.random() - 0.5) * 3);
+    ctx.stroke();
+  }
+  grain(ctx, 1024, 1024, 0.05, 60000);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2, 2); return t;
+}
+const table = new THREE.Mesh(new THREE.PlaneGeometry(14, 10), woodMaps());
+table.position.z = -0.05; table.receiveShadow = true; scene.add(table);
+
+const book = new THREE.Group(); scene.add(book);
+const EPS = 0.0016; // épaisseur d'une feuille
+
+// Couverture arrière (fixe) et blocs de pages vus par la tranche
+// Couvertures : un peu plus grandes que les pages, de la même taille devant et derrière.
+const CW = PW + 0.05, CH = PH + 0.075;
+const leatherMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.7 });
+// Couverture arrière : seulement sous la moitié droite (la couverture avant, une fois ouverte, borde la gauche).
+const backBoard = new THREE.Mesh(new THREE.BoxGeometry(CW, CH, 0.02), leatherMat);
+backBoard.position.set(CW / 2, 0, -0.035); backBoard.receiveShadow = true; backBoard.castShadow = true; book.add(backBoard);
+const edgeMat = new THREE.MeshStandardMaterial({ color: 0xe9e2d2, roughness: 0.9 });
+const COVER_T = 0.02; // épaisseur des plats
+const sideMat = new THREE.MeshStandardMaterial({ color: 0x1d3784, roughness: 0.55 });
+// Dos arrondi : demi-cylindre de cuir côté reliure, avec deux nerfs dorés.
+const spine = new THREE.Group(); book.add(spine);
+{
+  const half = new THREE.CylinderGeometry(1, 1, CH, 48, 1, true, Math.PI, Math.PI);
+  const body = new THREE.Mesh(half, sideMat); body.castShadow = body.receiveShadow = true; spine.add(body);
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xd9b46a, metalness: 1, roughness: 0.28 });
+  [-0.36, -0.3, 0.3, 0.36].forEach((y) => {
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(1.015, 1.015, 0.008, 48, 1, true, Math.PI, Math.PI), goldMat);
+    band.position.y = y * CH; spine.add(band);
+  });
+}
+const blockR = new THREE.Mesh(new THREE.BoxGeometry(PW * 0.985, PH * 0.985, 1), edgeMat);
+const blockL = blockR.clone();
+[blockR, blockL].forEach((b) => { b.castShadow = b.receiveShadow = true; book.add(b); });
+
+// Feuilles : géométrie souple (déformée à chaque image pendant qu'elle tourne)
+const SEG = 36;
+const sheets = [];
+let paperBump = null;
+// Brillance : papier satiné (0,55), or poli (0,22)
+function roughFrom(goldCanvas) {
+  const c = document.createElement("canvas"); c.width = goldCanvas.width; c.height = goldCanvas.height; const x = c.getContext("2d");
+  x.fillStyle = "rgb(140,140,140)"; x.fillRect(0, 0, c.width, c.height);
+  x.globalCompositeOperation = "darken"; x.filter = "invert(1) brightness(0.45)"; x.drawImage(goldCanvas, 0, 0);
+  // Or satiné plutôt que miroir : reflets plus doux, moins de grain
+  x.filter = "none"; x.globalCompositeOperation = "lighten"; x.fillStyle = "rgb(105,105,105)"; x.fillRect(0, 0, c.width, c.height); return c;
+}
+function makeSheet(i, front, back) {
+  const w = i === 0 ? CW : PW, h = i === 0 ? CH : PH;
+  const geo = new THREE.PlaneGeometry(w, h, SEG, 1); geo.translate(w / 2, 0, 0);
+  const base = geo.attributes.position.array.slice();
+  const mk = (src, side, flip) => {
+    const map = new THREE.CanvasTexture(src.canvas); map.colorSpace = THREE.SRGBColorSpace; map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    if (flip) { map.wrapS = THREE.RepeatWrapping; map.repeat.x = -1; map.offset.x = 1; }
+    // Papier satiné de magazine : légère brillance, grain fin en relief ; dorures en métal poli.
+    const gold = new THREE.CanvasTexture(src.gold);
+    if (flip) { gold.wrapS = THREE.RepeatWrapping; gold.repeat.x = -1; gold.offset.x = 1; }
+    const rough = new THREE.CanvasTexture(roughFrom(src.gold));
+    if (flip) { rough.wrapS = THREE.RepeatWrapping; rough.repeat.x = -1; rough.offset.x = 1; }
+    return new THREE.MeshStandardMaterial({ map, side, roughness: 1, roughnessMap: rough, metalness: 1, metalnessMap: gold, normalMap: paperBump, normalScale: new THREE.Vector2(0.35, 0.35), envMapIntensity: 0.7 });
+  };
+  let frontMat;
+  if (i === 0) { frontMat = leatherMaps(1024, Math.round((1024 * CH) / CW), true); frontMat.side = THREE.FrontSide; }
+  else frontMat = mk(front, THREE.FrontSide, false);
+  const mFront = new THREE.Mesh(geo, frontMat);
+  const mBack = new THREE.Mesh(geo, mk(back, THREE.BackSide, true));
+  let edge = null;
+  if (i === 0) {
+    // Plat épais : la face cuir repose sur une tranche de carton gainé.
+    mFront.position.z = COVER_T;
+    const hidden = new THREE.MeshBasicMaterial({ visible: false });
+    const bx = new THREE.BoxGeometry(w, h, COVER_T); bx.translate(w / 2, 0, COVER_T / 2);
+    edge = new THREE.Mesh(bx, [sideMat, sideMat, sideMat, sideMat, hidden, hidden]); edge.castShadow = edge.receiveShadow = true;
+  }
+  [mFront, mBack].forEach((m) => { m.castShadow = true; m.receiveShadow = true; m.userData.sheet = i; });
+  mFront.userData.face = i * 2; mBack.userData.face = i * 2 + 1;
+  const g = new THREE.Group(); g.add(mFront, mBack); if (edge) g.add(edge); book.add(g);
+  sheets.push({ g, geo, base, w, p: 0, from: 0, to: 0, t: 1, rigid: i === 0 });
+}
+
+// Pose une feuille selon sa progression p (0 : à droite, 1 : à gauche).
+function bend(s) {
+  if (s.rigid) { s.g.rotation.y = -s.p * Math.PI; return; }
+  const p = s.p, pos = s.geo.attributes.position, arr = pos.array;
+  const theta = p * Math.PI;
+  const curl = s.rigid ? 0 : Math.sin(p * Math.PI) * 0.95;    // le papier se courbe au milieu du geste
+  const lift = Math.sin(p * Math.PI) * (s.rigid ? 0.02 : 0.05);
+  let x = 0, z = 0, prev = 0;
+  const xs = [], zs = [];
+  for (let k = 0; k <= SEG; k++) {
+    const u = k / SEG;
+    // Le bord libre traîne derrière la reliure : effet magazine
+    const a = theta - (s.dir || 1) * curl * Math.pow(u, 1.5) * 0.9;
+    if (k > 0) { const du = (u - prev) * s.w; x += Math.cos(a) * du; z += Math.sin(a) * du; }
+    xs.push(x); zs.push(z + lift * Math.sin(u * Math.PI) * 0.6); prev = u;
+  }
+  for (let v = 0; v < pos.count; v++) {
+    const col = Math.round((s.base[v * 3] / s.w) * SEG);
+    arr[v * 3] = xs[col]; arr[v * 3 + 1] = s.base[v * 3 + 1]; arr[v * 3 + 2] = zs[col];
+  }
+  pos.needsUpdate = true; s.geo.computeVertexNormals(); s.geo.computeBoundingSphere(); s.geo.computeBoundingBox();
+}
+
+let page = 0; // nombre de feuilles tournées
+function stackZ(i, p) {
+  // Empilement : à droite les feuilles non tournées, à gauche les feuilles tournées.
+  const right = (SHEETS - i) * EPS, left = i * EPS;
+  return right + (left - right) * p;
+}
+function layout() {
+  sheets.forEach((s, i) => { bend(s); s.g.position.z = stackZ(i, s.p) + 0.001; });
+  const turned = sheets.filter((s) => s.p > 0.5).length;
+  const r = Math.max(0.0005, (SHEETS - turned) * EPS), l = Math.max(0.0005, turned * EPS);
+  blockR.scale.z = r; blockR.position.set(PW / 2, 0, -0.025 + r / 2);
+  blockL.scale.z = l; blockL.position.set(-PW / 2, 0, -0.025 + l / 2);
+  blockL.visible = turned > 1; blockR.visible = turned < SHEETS;
+  const o = sheets[0].p, top = stackZ(0, 0) + 0.001 + COVER_T, bottom = -0.045;
+  const rz = (top - bottom) / 2 * (1 - o) + 0.01 * o, cz = (top + bottom) / 2 * (1 - o) + (-0.034) * o;
+  spine.position.set(0, 0, cz); spine.scale.set(Math.max(0.012, rz * (1 - o * 0.6)), 1, rz);
+}
+
+// ───────────── Navigation ─────────────
+// Vitesse constante sur presque tout le geste, avec un départ et un arrêt très courts et doux.
+const RAMP = 0.12, VMAX = 1 / (1 - RAMP);
+const ease = (t) => t < RAMP ? 0.5 * VMAX * t * t / RAMP : t > 1 - RAMP ? 1 - 0.5 * VMAX * (1 - t) * (1 - t) / RAMP : VMAX * (t - RAMP / 2);
+function goTo(target, dur) {
+  target = Math.max(0, Math.min(SHEETS - 1, target));
+  if (target === page || sheets.some((s) => s.t < 1)) return;
+  const dir = target > page ? 1 : -1, many = Math.abs(target - page) > 1;
+  let k = 0;
+  for (let i = dir > 0 ? page : page - 1; dir > 0 ? i < target : i >= target; i += dir, k++) {
+    const s = sheets[i];
+    s.from = s.p; s.to = dir > 0 ? 1 : 0; s.t = 0; s.dir = dir; s.delay = k * 0.2;
+    s.dur = dur || (many ? 1.05 : 1.45);
+  }
+  page = target; updateUi();
+}
+function go(dir) {
+  // Chaque clic lance la feuille suivante, même si la précédente tourne encore.
+  const target = page + dir;
+  if (target < 0 || target > SHEETS - 1) return;
+  const s = dir > 0 ? sheets[page] : sheets[page - 1];
+  if (s.t < 1) return;
+  s.from = s.p; s.to = dir > 0 ? 1 : 0; s.t = 0; s.dir = dir; s.delay = 0; s.dur = 1.45;
+  page = target; updateUi();
+}
+function updateUi() {
+  document.getElementById("prev").disabled = page === 0;
+  document.getElementById("next").disabled = page >= SHEETS - 1;
+  document.getElementById("count").textContent = page === 0 ? "Couverture" : `${page} / ${SHEETS - 1}`;
+  document.getElementById("hint").textContent = page === 0 ? "Cliquez sur la couverture pour ouvrir le livre" : "Cliquez sur une vignette pour voir la vidéo sur YouTube";
+}
+document.getElementById("prev").onclick = () => go(-1);
+document.getElementById("next").onclick = () => go(1);
+addEventListener("keydown", (e) => { if (lb.classList.contains("open")) { if (e.key === "Escape") closeVideo(); return; } if (e.key === "ArrowRight") go(1); if (e.key === "ArrowLeft") go(-1); });
+
+// Lecteur vidéo
+const lb = document.getElementById("lightbox");
+function openVideo(h) {
+  document.getElementById("lbTitle").textContent = h.title;
+  document.getElementById("lbFrame").src = `https://www.youtube-nocookie.com/embed/${h.id}?rel=0&modestbranding=1&autoplay=1`;
+  lb.classList.add("open");
+}
+function closeVideo() { lb.classList.remove("open"); document.getElementById("lbFrame").src = ""; }
+document.getElementById("lbClose").onclick = closeVideo;
+lb.onclick = (e) => { if (e.target === lb) closeVideo(); };
+
+// Clic dans la scène : vignette → vidéo ; sinon page de droite → suivante, page de gauche → précédente.
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+function pick(e) {
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const meshes = sheets.flatMap((s) => s.g.children);
+  return ray.intersectObjects(meshes, false)[0];
+}
+renderer.domElement.addEventListener("click", (e) => {
+  const hit = pick(e); if (!hit) return;
+  const face = hit.object.userData.face, uv = hit.uv;
+  const u = face % 2 ? 1 - uv.x : uv.x, v = 1 - uv.y;
+  const h = hits[face];
+  if (h && u > h.x0 && u < h.x1 && v > h.y0 && v < h.y1) return void window.open(`https://www.youtube.com/watch?v=${h.id}`, "_blank", "noopener");
+  if (face === 1) { const c = catAt(u, v); if (c >= 0) return goTo(catPage(c)); }
+  go(face % 2 ? -1 : 1);
+});
+const catAt = (u, v) => { const c = catHits.find((r) => u > r.x0 && u < r.x1 && v > r.y0 && v < r.y1); return c ? c.k : -1; };
+function catPage(k) { const f = faces.findIndex((x) => x.cat === CATS[k]); return f % 2 ? (f + 1) / 2 : f / 2; }
+renderer.domElement.addEventListener("pointermove", (e) => {
+  const hit = pick(e); let over = false; hoverCat = -1;
+  if (hit) { const face = hit.object.userData.face, h = hits[face]; const u = face % 2 ? 1 - hit.uv.x : hit.uv.x, v = 1 - hit.uv.y; over = !!(h && u > h.x0 && u < h.x1 && v > h.y0 && v < h.y1); if (face === 1) { hoverCat = catAt(u, v); over = over || hoverCat >= 0; } }
+  renderer.domElement.style.cursor = hit ? (over ? (hoverCat >= 0 ? "pointer" : "zoom-in") : "pointer") : "default";
+});
+
+// Cadrage : livre fermé centré sur la couverture, ouvert centré sur la double page.
+let bookX = -PW / 2;
+function resize() {
+  const w = innerWidth, h = innerHeight; renderer.setSize(w, h); camera.aspect = w / h;
+  const fit = (PW * 2.35) / (2 * Math.tan((camera.fov * Math.PI) / 360) * camera.aspect);
+  const dist = Math.max(fit, (PH * 1.35) / (2 * Math.tan((camera.fov * Math.PI) / 360)));
+  camera.position.set(0, -dist * 0.22, dist); camera.lookAt(0, 0.02, 0); camera.updateProjectionMatrix();
+}
+addEventListener("resize", resize);
+
+// ───────────── Démarrage ─────────────
+await document.fonts.load("800 40px Poppins"); await document.fonts.load("500 20px Poppins"); await document.fonts.load("400 20px Poppins");
+images.logo = await loadImg("logo-mark.webp");
+await Promise.all(VIDEOS.map(async (v) => (images[v[0]] = await loadImg(`films/${v[0]}.webp`))));
+paperBump = paperNormal();
+backBoard.material = leatherMaps(512, Math.round((512 * CH) / CW), false);
+for (let i = 0; i < SHEETS; i++) makeSheet(i, drawFace(i * 2), drawFace(i * 2 + 1));
+title.tex = sheets[0].g.children[1].material.map;
+const bois = await loadImg("bois.avif");
+if (bois) {
+  const map = new THREE.Texture(bois); map.colorSpace = THREE.SRGBColorSpace; map.needsUpdate = true;
+  const hc = document.createElement("canvas"); hc.width = Math.min(1024, bois.width); hc.height = Math.round(hc.width * bois.height / bois.width);
+  const hx = hc.getContext("2d"); hx.filter = "grayscale(1)"; hx.drawImage(bois, 0, 0, hc.width, hc.height);
+  const nrm = new THREE.CanvasTexture(heightToNormal(hc, 2.2));
+  const tile = 3.2; // largeur d'un motif, en unités de scène
+  [map, nrm].forEach((t) => { t.wrapS = t.wrapT = THREE.MirroredRepeatWrapping; t.repeat.set(14 / tile, 10 / (tile * bois.height / bois.width)); t.anisotropy = 8; });
+  table.material = new THREE.MeshStandardMaterial({ map, normalMap: nrm, normalScale: new THREE.Vector2(0.5, 0.5), roughness: 0.6, metalness: 0, envMapIntensity: 0.3, color: 0x8c8c8c });
+}
+resize(); layout(); updateUi();
+document.getElementById("loading").style.opacity = 0;
+
+const clock = new THREE.Clock();
+let lightOpen = 0;
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  let moving = false;
+  for (const s of sheets) if (s.t < 1) {
+    moving = true;
+    if (s.delay > 0) { s.delay -= dt; continue; }
+    s.t = Math.min(1, s.t + dt / s.dur); s.p = s.from + (s.to - s.from) * ease(s.t);
+  }
+  let catChanged = false;
+  catHover.forEach((v, k) => { const t = k === hoverCat ? 1 : 0; if (v !== t) { catHover[k] = t > v ? Math.min(1, v + dt * 5) : Math.max(0, v - dt * 4); catChanged = true; } });
+  if (catChanged) drawCats();
+  lightOpen += ((page > 0 ? 1 : 0) - lightOpen) * Math.min(1, dt * 1.5);
+  key.intensity = 2.4 - 1.25 * lightOpen; fill.intensity = 0.6 - 0.35 * lightOpen; scene.environmentIntensity = 0.35 - 0.1 * lightOpen;
+  if (moving) layout();
+  const targetX = page === 0 ? -PW / 2 : page >= SHEETS - 1 && sheets[SHEETS - 1].p > 0.99 ? PW / 2 : 0;
+  bookX += (targetX - bookX) * Math.min(1, dt * 3);
+  book.position.x = bookX;
+  book.rotation.x = -0.04 + Math.sin(clock.elapsedTime * 0.4) * 0.004;
+  const sw = (clock.elapsedTime % 7) / 7; // un passage toutes les 7 secondes
+  sweep.position.x = -2.4 + sw * 4.8; sweep.position.y = 0.5 - sw * 0.9; sweep.intensity = Math.sin(sw * Math.PI) * (2.6 - 1 * lightOpen);
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>

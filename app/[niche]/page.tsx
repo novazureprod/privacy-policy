@@ -68,9 +68,7 @@ export default async function NichePage({ params }: Props) {
           <p className="mx-auto mt-6 max-w-xl text-base text-[var(--nz-muted)] sm:text-lg">{n.intro}</p>
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
-              href={SITE.calendly}
-              target="_blank"
-              rel="noopener"
+              href="/#rdv"
               className="btn-accent rounded-full px-9 py-3.5 font-sub text-xs tracking-[0.2em] uppercase"
             >
               Prendre rendez-vous
@@ -195,9 +193,7 @@ export default async function NichePage({ params }: Props) {
             <h2 className="metal-text font-display text-3xl font-extrabold sm:text-4xl">Votre projet, en images</h2>
             <p className="mx-auto mt-4 max-w-lg text-[var(--nz-muted)]">Un premier échange, sans engagement.</p>
             <a
-              href={SITE.calendly}
-              target="_blank"
-              rel="noopener"
+              href="/#rdv"
               className="btn-accent mt-8 rounded-full px-10 py-4 font-sub text-xs tracking-[0.2em] uppercase"
             >
               Prendre rendez-vous

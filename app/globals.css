@@ -301,3 +301,46 @@ footer { border-top-color: rgba(224, 197, 143, 0.22) !important; }
 .glass-gold::after { background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%); }
 .glass .metal-text { background: linear-gradient(180deg, #112250 0%, #1e3a8a 55%, #9a7634 100%); -webkit-background-clip: text; background-clip: text; }
 .glass .eyebrow::after { background: #c9a35a; }
+
+/* V4 : titre d'accueil qui se construit (lettres resserrées, flou qui se dissipe, balayage), puis garde son reflet */
+.hero-build { animation: sheen 9s ease-in-out 2.4s infinite, hero-build 2.2s cubic-bezier(.2,.7,.2,1) both; -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%); mask-image: linear-gradient(90deg, #000 40%, transparent 60%); -webkit-mask-size: 300% 100%; mask-size: 300% 100%; }
+@keyframes hero-build {
+  0% { opacity: 0; letter-spacing: .35em; filter: blur(14px); -webkit-mask-position: 100% 0; mask-position: 100% 0; transform: translateY(10px); }
+  55% { opacity: 1; filter: blur(3px); }
+  100% { opacity: 1; letter-spacing: normal; filter: blur(0); -webkit-mask-position: 0 0; mask-position: 0 0; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .hero-build { animation: none; -webkit-mask-image: none; mask-image: none; } }
+
+/* V4 : néon doré moderne au survol des boutons */
+.btn-accent:hover, .btn-accent:focus-visible {
+  box-shadow: 0 0 0 1px #f1d79a, 0 0 12px rgba(241,215,154,.9), 0 0 32px rgba(224,197,143,.7), 0 0 70px rgba(224,197,143,.35);
+  animation: neon-flicker 1.4s ease-out 1;
+}
+.glass-gold:hover, .glass-gold:focus-visible {
+  border-color: #f1d79a;
+  box-shadow: 0 0 0 1px rgba(241,215,154,.9), 0 0 10px rgba(241,215,154,.75), 0 0 28px rgba(224,197,143,.55), 0 0 60px rgba(224,197,143,.25), inset 0 0 12px rgba(241,215,154,.35);
+  text-shadow: 0 0 8px rgba(224,197,143,.55);
+  animation: neon-flicker 1.4s ease-out 1;
+}
+@keyframes neon-flicker { 0% { filter: brightness(1); } 8% { filter: brightness(1.35); } 12% { filter: brightness(.95); } 18% { filter: brightness(1.3); } 30%, 100% { filter: brightness(1.08); } }
+@media (prefers-reduced-motion: reduce) { .btn-accent:hover, .glass-gold:hover { animation: none; } }
+
+/* V4 : frise chronologique */
+.timeline .tl-dot { background: rgba(224,197,143,.25); box-shadow: 0 0 0 4px rgba(224,197,143,.08); transition: background .5s, box-shadow .5s, transform .5s; transform: translateX(-50%) scale(.7); }
+.timeline .tl-step { opacity: .35; transition: opacity .6s ease; }
+.timeline .tl-step .tl-img { transform: translateY(14px) scale(.97); transition: transform .8s cubic-bezier(.2,.7,.2,1); }
+.timeline .tl-step.is-on { opacity: 1; }
+.timeline .tl-step.is-on .tl-img { transform: none; }
+.timeline .tl-step.is-on .tl-dot { background: #f1d79a; box-shadow: 0 0 0 4px rgba(224,197,143,.2), 0 0 16px rgba(241,215,154,.9); transform: translateX(-50%) scale(1); }
+.timeline.tl-static .tl-sticky { position: static; height: auto; padding: 6rem 0; }
+.timeline.tl-static .tl-track { overflow-x: auto; width: auto; scroll-snap-type: x mandatory; }
+.timeline.tl-static .tl-step { opacity: 1; scroll-snap-align: start; }
+
+/* V4 : petites barres du tableau de bord */
+.kpi-bar { transform-origin: bottom; animation: kpi-grow 1.2s cubic-bezier(.2,.7,.2,1) both; }
+.reveal:not(.is-in) .kpi-bar { animation-play-state: paused; }
+@keyframes kpi-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+/* V4 : créneaux du calendrier */
+.booking .slot { transition: background .25s, box-shadow .25s, transform .2s; }
+.booking .slot:hover, .booking .slot:focus-visible { background: #112250; color: #f1d79a; box-shadow: 0 0 0 1px #f1d79a, 0 0 14px rgba(224,197,143,.6); transform: translateY(-1px); }

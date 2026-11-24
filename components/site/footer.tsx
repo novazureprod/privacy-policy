@@ -41,7 +41,7 @@ export function Footer() {
           <p className="font-sub text-[11px] tracking-[0.25em] text-[var(--nz-muted)] uppercase">Contact</p>
           <ul className="mt-4 grid gap-2 text-sm">
             <li>
-              <a href={SITE.calendly} target="_blank" rel="noopener" className="footer-link !text-[var(--nz-gold)]">
+              <a href="/#rdv" className="footer-link !text-[var(--nz-gold)]">
                 Prendre rendez-vous
               </a>
             </li>

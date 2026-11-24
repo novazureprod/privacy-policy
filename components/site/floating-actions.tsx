@@ -25,9 +25,7 @@ export function FloatingActions() {
       aria-hidden={!shown}
     >
       <a
-        href={SITE.calendly}
-        target="_blank"
-        rel="noopener"
+        href="/#rdv"
         tabIndex={shown ? 0 : -1}
         className="glass glass-gold pointer-events-auto mx-auto flex items-center gap-2 rounded-full px-6 py-3 font-sub text-[11px] tracking-[0.2em] text-[var(--nz-gold)] uppercase lg:hidden"
       >

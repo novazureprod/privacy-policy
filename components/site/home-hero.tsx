@@ -9,7 +9,7 @@ export function HomeHero() {
     <section className="relative flex min-h-[100svh] flex-col items-center justify-center px-6 pt-24 pb-24 text-center">
       <img src="/logo/logo-mark.webp" alt="Novazure" width={112} height={118} className="hero-logo h-auto w-24 sm:w-28" />
       <p className="eyebrow mt-8">Vidéaste · Drone · Côte d&apos;Azur</p>
-      <h1 className="metal-sheen mt-4 max-w-2xl font-display text-4xl leading-tight font-extrabold sm:text-6xl">
+      <h1 className="metal-sheen hero-build mt-4 max-w-2xl font-display text-4xl leading-tight font-extrabold sm:text-6xl">
         Votre histoire, en mouvement.
       </h1>
       <p className="mt-4 max-w-md text-sm text-[var(--nz-muted)] sm:text-base">
@@ -28,9 +28,7 @@ export function HomeHero() {
         ))}
       </ul>
       <a
-        href={SITE.calendly}
-        target="_blank"
-        rel="noopener"
+        href="/#rdv"
         className="btn-accent mt-8 rounded-full px-8 py-3 font-sub text-xs tracking-[0.2em] uppercase"
       >
         Prendre rendez-vous

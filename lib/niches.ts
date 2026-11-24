@@ -139,4 +139,4 @@ export function getNiche(slug: string): Niche | undefined {
   return NICHES.find((n) => n.slug === slug)
 }
 
-export const CALENDLY_URL = "https://calendly.com/" // à remplacer par l'URL Calendly de Novazure
+export const CALENDLY_URL = "https://calendly.com/novazure-contact/30min"

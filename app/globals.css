@@ -248,3 +248,23 @@ html { scroll-behavior: smooth; scroll-padding-top: 80px; }
 .hero-logo { filter: drop-shadow(0 12px 30px rgba(224,197,143,.35)); animation: logo-in 1.2s cubic-bezier(.2,.7,.2,1) both; }
 @keyframes logo-in { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .hero-logo { animation: none; } }
+
+
+/* Fond : dégradé de bleu royal, plus profond en haut et en bas, une lueur dorée très discrète */
+.ambient {
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 0%, rgba(44, 74, 160, 0.55) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 45% at 85% 100%, rgba(224, 197, 143, 0.10) 0%, transparent 70%),
+    linear-gradient(180deg, #0a1636 0%, #112250 38%, #15295f 62%, #0b1738 100%);
+}
+.ambient-blob--blue { opacity: .22; }
+
+/* Finitions dorées : liseré en haut des cartes, filets et titres qui se terminent en or */
+.glass { border-top-color: rgba(224, 197, 143, 0.32); }
+.header-glass { box-shadow: 0 1px 0 rgba(224, 197, 143, 0.22), 0 12px 30px -18px rgba(0, 0, 0, 0.9); }
+.metal-text { background: linear-gradient(180deg, #ffffff 0%, #f5f0e9 45%, #e0c58f 100%); -webkit-background-clip: text; background-clip: text; }
+.divider::before { background: linear-gradient(90deg, transparent, rgba(224, 197, 143, 0.45)); }
+.divider::after { background: linear-gradient(90deg, rgba(224, 197, 143, 0.45), transparent); }
+footer { border-top-color: rgba(224, 197, 143, 0.22) !important; }
+.eyebrow::after { content: ""; display: block; width: 28px; height: 1px; margin: 10px 0 0; background: var(--nz-gold); opacity: .7; }
+.text-center .eyebrow::after, .eyebrow.text-center::after { margin: 10px auto 0; }

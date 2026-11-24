@@ -25,7 +25,7 @@ export function Particles() {
       r: Math.random() * 1.6 + 0.4,
       vx: (Math.random() - 0.5) * 0.25,
       vy: -Math.random() * 0.3 - 0.05,
-      gold: Math.random() < 0.12,
+      gold: Math.random() < 0.5,
       a: Math.random() * 0.6 + 0.2,
     })
 
@@ -53,7 +53,8 @@ export function Particles() {
           if (p.x < -4) p.x = w + 4
           if (p.x > w + 4) p.x = -4
         }
-        const color = p.gold ? "224,197,143" : "245,240,233"
+        // Deux couleurs seulement : or doux (Quicksand) et beige (Swan Wing un peu plus chaud).
+        const color = p.gold ? "224,197,143" : "232,220,196"
         const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4)
         g.addColorStop(0, `rgba(${color}, ${p.a})`)
         g.addColorStop(1, `rgba(${color}, 0)`)

@@ -50,12 +50,13 @@ export function Particles() {
       const x = Math.random() * w
       const i = Math.abs((Math.random() + Math.random() - 1) * 10)
       const y = anywhere ? Math.random() * h : fold(x, i, t)
-      const max = 260 + Math.random() * 380
+      // Montée lente : les grains flottent longtemps dans l'air avant de s'éteindre.
+      const max = 700 + Math.random() * 900
       return {
         x,
         y,
-        vx: (Math.random() - 0.3) * 0.25,
-        vy: -(0.18 + Math.random() * 0.5),
+        vx: (Math.random() - 0.4) * 0.12,
+        vy: -(0.05 + Math.random() * 0.16),
         r: Math.random() < 0.15 ? Math.random() * 1.8 + 1.2 : Math.random() * 1.1 + 0.4,
         life: anywhere ? Math.random() * max : 0,
         max,
@@ -81,7 +82,7 @@ export function Particles() {
         ph: Math.random() * Math.PI * 2,
         gold: Math.random() < 0.85,
       }))
-      rising = Array.from({ length: small ? 70 : 150 }, () => spawnRise(true))
+      rising = Array.from({ length: small ? 110 : 240 }, () => spawnRise(true))
       bokeh = Array.from({ length: small ? 14 : 24 }, () => ({
         x: Math.random() * w,
         y: h * (0.7 + Math.random() * 0.35),
@@ -148,7 +149,7 @@ export function Particles() {
         const p = rising[k]
         if (!reduce) {
           p.life++
-          p.x += p.vx + Math.sin((p.life + k * 13) / 40) * 0.15
+          p.x += p.vx + Math.sin((p.life + k * 13) / 90) * 0.12
           p.y += p.vy
         }
         const f = p.life / p.max

@@ -1,42 +1,65 @@
-// Fond « vagues de poussière d'or » en WebGL (three.js) : ~13 000 particules sur des nappes
-// ondulantes, avec une vraie profondeur de champ (bokeh) calculée dans le shader.
-// La crête de la vague centrale est nette, dense et dorée ; tout ce qui s'en éloigne (vers la
-// caméra en bas, vers le fond en haut) grossit, s'adoucit et devient flou.
+// Fond « vagues de poussière d'or » en WebGL (three.js), d'après l'image de référence de Novazure.
+// - Une vague principale basse et douce (tiers inférieur), qui ne remonte que sur le bord droit.
+// - Une arête de « sable » ultra-fin et un ruban de soie lumineux (bleu au centre, or à droite).
+// - Une poussière d'or libre qui se détache et flotte lentement vers le haut.
+// - Une vraie profondeur de champ : tout ce qui s'éloigne de la crête grossit et devient flou.
+// Le haut et le centre de l'écran restent sombres pour que le texte reste lisible.
 import * as THREE from "three"
+
+// Crête de la vague, partagée par les particules et le ruban. s = position relative (-1 bord gauche, 1 bord droit).
+const CREST = /* glsl */ `
+  uniform float uHalfW;
+  float crest(float x, float z, float t) {
+    float s = x / uHalfW;
+    return -1.14
+      - 0.12 * (1.0 - s * s)                 // creux doux et étiré au centre
+      + 0.45 * smoothstep(0.35, 1.1, s)      // remontée élégante, seulement sur le bord droit
+      + 0.035 * sin(1.6 * x + t * 0.30 + z)
+      + 0.012 * sin(4.1 * x - t * 0.25 + z * 1.7);
+  }
+`
 
 const VERT = /* glsl */ `
   uniform float uTime;
   uniform float uScale;
   uniform float uFocus;
-  attribute vec4 aSeed;     // x : position le long de la vague, y : écart sous la crête, z : profondeur, w : aléa
+  attribute vec4 aSeed;     // x : position, y : écart / hauteur, z : profondeur, w : aléa
   attribute vec3 aColor;
-  attribute float aLayer;   // 0 : vague centrale, 1 : vague lointaine, 2 : bokeh du premier plan
+  attribute float aLayer;   // 0 vague, 1 vague lointaine, 2 bokeh avant, 3 sable de la crête, 4 poussière libre
   varying vec3 vColor;
   varying float vBlur;
   varying float vAlpha;
-
-  float crest(float x, float z, float t) {
-    // Descend depuis la gauche, se creuse au centre, remonte fortement à droite.
-    return -0.25 + 0.20 * x * x + 0.16 * x
-      + 0.07 * sin(2.1 * x + t * 0.35 + z * 0.8)
-      + 0.035 * sin(4.3 * x - t * 0.28 + z * 1.7);
-  }
+  ${CREST}
 
   void main() {
     float t = uTime;
-    float x = aSeed.x;
+    float x = aSeed.x * uHalfW;
     float d = aSeed.y;
     float z = aSeed.z;
+    float w = aSeed.w;
+    float fade = 1.0;
     vec3 p;
     if (aLayer < 0.5) {
-      // Vague centrale : les grains sous la crête descendent et se rapprochent de la caméra.
-      p = vec3(x, crest(x, z, t) - d, z + d * 1.6);
+      // Corps de la vague : sous la crête, les grains descendent et se rapprochent de la caméra.
+      p = vec3(x, crest(x, z, t) - d, z + d * 1.4);
     } else if (aLayer < 1.5) {
-      // Vague lointaine, haute et diffuse.
-      p = vec3(x, 0.95 + 0.12 * sin(1.6 * x + t * 0.22) + 0.05 * sin(3.4 * x - t * 0.2) - d * 0.9, -2.6 + z);
+      // Vague lointaine, haute, diffuse et très discrète.
+      p = vec3(x, 1.35 + 0.08 * sin(1.4 * x + t * 0.2) - d * 0.5, -2.6 + z);
+      fade = 0.35;
+    } else if (aLayer < 2.5) {
+      // Gros bokeh du premier plan, tout en bas.
+      p = vec3(x + 0.05 * sin(t * 0.15 + w * 6.28), -1.55 + d * 0.4 + 0.04 * sin(t * 0.2 + w * 12.0), 2.2 + z);
+      fade = 0.8;
+    } else if (aLayer < 3.5) {
+      // Arête de la vague : sable ultra-fin, très dense.
+      p = vec3(x, crest(x, z, t) - d, z);
     } else {
-      // Bokeh du premier plan : grosses particules qui dérivent lentement.
-      p = vec3(x + 0.05 * sin(t * 0.15 + aSeed.w * 6.28), -1.35 + d + 0.05 * sin(t * 0.2 + aSeed.w * 12.0), 2.2 + z);
+      // Poussière libre : monte lentement en boucle, avec un balancement aléatoire.
+      float y = -1.75 + mod(d * 3.6 + t * (0.018 + w * 0.03), 3.6);
+      float px = x + sin(t * (0.15 + w * 0.2) + w * 40.0) * 0.12 + sin(t * 0.07 + w * 9.0) * 0.06;
+      p = vec3(px, y, z);
+      // Rare en haut et au centre (zone du texte), apparaît en douceur au bas de la boucle.
+      fade = (1.0 - 0.9 * smoothstep(-0.8, 0.5, y)) * smoothstep(-1.75, -1.4, y);
     }
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
@@ -44,17 +67,13 @@ const VERT = /* glsl */ `
     // Cercle de confusion : distance au plan net (la crête).
     float coc = abs(-mv.z - uFocus);
     vBlur = clamp(coc * 0.9, 0.0, 1.0);
-    float base = aLayer > 1.5 ? 2.6 : (0.55 + aSeed.w * 0.9);
-    float size = base * (1.0 + coc * 6.0);
-    gl_PointSize = size * uScale / -mv.z;
+    float base = aLayer > 3.5 ? (0.7 + w * 1.4) : aLayer > 2.5 ? 0.38 : aLayer > 1.5 ? 2.6 : (0.55 + w * 0.9);
+    gl_PointSize = base * (1.0 + coc * 6.0) * uScale / -mv.z;
 
-    // Les grains flous étalent leur lumière : on baisse leur intensité pour garder l'équilibre.
-    float twinkle = 0.75 + 0.25 * sin(t * (1.0 + aSeed.w * 3.0) + aSeed.w * 40.0);
-    vAlpha = twinkle / (1.0 + coc * coc * 14.0);
-    if (aLayer > 1.5) vAlpha *= 0.85;
-    if (aLayer > 0.5 && aLayer < 1.5) vAlpha *= 2.2;
-    // La trame bleue reste discrète ; l'or porte la lumière.
-    if (aColor.b > aColor.r) vAlpha *= 0.6;
+    float twinkle = 0.7 + 0.3 * sin(t * (1.0 + w * 3.0) + w * 40.0);
+    vAlpha = twinkle * fade / (1.0 + coc * coc * 14.0);
+    if (aLayer > 2.5 && aLayer < 3.5) vAlpha *= 1.3;
+    if (aColor.b > aColor.r && aLayer < 2.5) vAlpha *= 0.6; // la trame bleue reste discrète
     vColor = aColor;
   }
 `
@@ -67,8 +86,8 @@ const FRAG = /* glsl */ `
     vec2 c = gl_PointCoord - 0.5;
     float r = length(c) * 2.0;
     if (r > 1.0) discard;
-    // Grain net : disque dur ; grain flou : disque doux, légèrement plus clair au bord (bokeh).
-    float edge = mix(0.12, 0.55, vBlur);
+    // Grain net : disque dur ; grain flou : disque doux, un peu plus clair au bord (bokeh).
+    float edge = mix(0.12, 0.6, vBlur);
     float disk = 1.0 - smoothstep(1.0 - edge, 1.0, r);
     float ring = mix(1.0, 0.82 + 0.25 * smoothstep(0.4, 0.95, r), vBlur);
     gl_FragColor = vec4(vColor * ring, disk * vAlpha);
@@ -94,9 +113,10 @@ export function mountDustWaves(container: HTMLElement) {
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 50)
   camera.position.set(0, 0, 4)
 
-  // Construction des particules
-  const counts = small ? { main: 6500, far: 1500, front: 200 } : { main: 11000, far: 2600, front: 380 }
-  const total = counts.main + counts.far + counts.front
+  const counts = small
+    ? { main: 4500, far: 400, front: 120, sand: 3000, free: 300 }
+    : { main: 7500, far: 700, front: 200, sand: 5000, free: 450 }
+  const total = counts.main + counts.far + counts.front + counts.sand + counts.free
   const seed = new Float32Array(total * 4)
   const color = new Float32Array(total * 3)
   const layer = new Float32Array(total)
@@ -107,26 +127,33 @@ export function mountDustWaves(container: HTMLElement) {
     layer[n] = l
     n++
   }
+  const span = () => (Math.random() * 2 - 1) * 1.15 // en fraction de demi-largeur d'écran
 
   for (let i = 0; i < counts.main; i++) {
-    const x = (Math.random() * 2 - 1) * 3.2
-    // Très dense sur la crête, puis de plus en plus clairsemé en descendant.
-    const d = Math.pow(Math.random(), 4.2) * 1.35
-    const z = (Math.random() - 0.5) * 0.25
-    const right = THREE.MathUtils.smoothstep(x, -0.6, 2.2) // la crête de droite est la plus dorée
-    const goldChance = d > 0.35 ? 0.85 : 0.25 + right * 0.7
-    const c = Math.random() < goldChance ? pick(GOLD) : pick(BLUE)
-    put([x, d, z, Math.random()], c, 0)
+    const s = span()
+    const d = Math.pow(Math.random(), 4) * 0.75 // très dense sous la crête, clairsemé plus bas
+    const right = THREE.MathUtils.smoothstep(s, 0.1, 0.95)
+    const goldChance = d > 0.2 ? 0.85 : 0.3 + right * 0.65
+    put([s, d, (Math.random() - 0.5) * 0.2, Math.random()], Math.random() < goldChance ? pick(GOLD) : pick(BLUE), 0)
+  }
+  for (let i = 0; i < counts.sand; i++) {
+    const s = span()
+    const right = THREE.MathUtils.smoothstep(s, 0.15, 0.9)
+    // Sable de l'arête : bleu électrique au centre, or intense sur la droite.
+    put([s, Math.pow(Math.random(), 2) * 0.018, (Math.random() - 0.5) * 0.06, Math.random()], Math.random() < 0.15 + right * 0.8 ? pick(GOLD) : pick(BLUE), 3)
   }
   for (let i = 0; i < counts.far; i++) {
-    const x = (Math.random() * 2 - 1) * 4.2
-    const right = THREE.MathUtils.smoothstep(x, -1, 3)
-    const c = Math.random() < right ? pick(GOLD) : pick(BLUE)
-    put([x, Math.pow(Math.random(), 2) * 0.6, (Math.random() - 0.5) * 0.6, Math.random()], c, 1)
+    const s = span() * 1.4
+    const right = THREE.MathUtils.smoothstep(s, -0.2, 1.2)
+    put([s, Math.pow(Math.random(), 2) * 0.5, (Math.random() - 0.5) * 0.6, Math.random()], Math.random() < right ? pick(GOLD) : pick(BLUE), 1)
   }
   for (let i = 0; i < counts.front; i++) {
-    const c = Math.random() < 0.75 ? pick(GOLD) : pick(BLUE)
-    put([(Math.random() * 2 - 1) * 1.6, Math.random() * 0.9, Math.random() * 0.8, Math.random()], c, 2)
+    put([span() * 0.55, Math.random(), Math.random() * 0.8, Math.random()], Math.random() < 0.75 ? pick(GOLD) : pick(BLUE), 2)
+  }
+  for (let i = 0; i < counts.free; i++) {
+    // Profondeurs variées : minuscules et nettes au loin, grosses et floues au premier plan.
+    const z = Math.random() < 0.7 ? (Math.random() - 0.5) * 1.6 : 1 + Math.random() * 1.4
+    put([span(), Math.random(), z, Math.random()], Math.random() < 0.9 ? pick(GOLD) : pick(BLUE), 4)
   }
 
   const geo = new THREE.BufferGeometry()
@@ -136,7 +163,7 @@ export function mountDustWaves(container: HTMLElement) {
   geo.setAttribute("aLayer", new THREE.BufferAttribute(layer, 1))
   geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 20)
 
-  const uniforms = { uTime: { value: 0 }, uScale: { value: 1 }, uFocus: { value: 4 } }
+  const uniforms = { uTime: { value: 0 }, uScale: { value: 1 }, uFocus: { value: 4 }, uHalfW: { value: 2.5 } }
   const mat = new THREE.ShaderMaterial({
     vertexShader: VERT,
     fragmentShader: FRAG,
@@ -148,51 +175,53 @@ export function mountDustWaves(container: HTMLElement) {
   const points = new THREE.Points(geo, mat)
   scene.add(points)
 
-  // Voiles de soie : deux rubans lumineux qui suivent les vagues (le halo bleu du drap,
-  // et la vague lointaine, bleue à gauche, dorée à droite).
+  // Rubans de soie : un liseré très fin et lumineux sur l'arête (bleu au centre, or à droite)
+  // avec un voile translucide dessous, et un halo bleu diffus tout en haut.
   const silkMat = (far: boolean) =>
     new THREE.ShaderMaterial({
       uniforms,
       transparent: true,
       depthWrite: false,
+      // Le ruban est retourné (il descend sous la crête) : on dessine les deux faces.
+      side: THREE.DoubleSide,
       blending: THREE.AdditiveBlending,
       vertexShader: /* glsl */ `
         uniform float uTime;
         varying vec2 vUv;
-        varying float vX;
-        float crest(float x, float t) {
-          return -0.25 + 0.20 * x * x + 0.16 * x + 0.07 * sin(2.1 * x + t * 0.35) + 0.035 * sin(4.3 * x - t * 0.28);
-        }
+        varying float vS;
+        ${CREST}
         void main() {
           vUv = uv;
-          float x = position.x;
-          vX = x;
+          float x = position.x * uHalfW;
+          vS = x / uHalfW;
           float t = uTime;
           vec3 p;
           if (${far ? "true" : "false"}) {
-            p = vec3(x, 0.98 + 0.12 * sin(1.6 * x + t * 0.22) + 0.05 * sin(3.4 * x - t * 0.2) - uv.y * 0.55, -2.7);
+            p = vec3(x, 1.9 + 0.08 * sin(1.4 * x + t * 0.2) - uv.y * 1.6, -2.6);
           } else {
-            p = vec3(x, crest(x, t) - uv.y * 0.75 + 0.02, -0.05 + uv.y * 0.6);
+            p = vec3(x, crest(x, 0.0, t) - uv.y * 0.55 + 0.004, uv.y * 0.45);
           }
           gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
         }
       `,
       fragmentShader: /* glsl */ `
         varying vec2 vUv;
-        varying float vX;
+        varying float vS;
         void main() {
           float v = vUv.y;
-          // Lumière concentrée juste sous la crête, qui s'éteint vers le bas et sur les bords.
-          float glow = exp(-v * 5.0) * smoothstep(0.0, 0.04, v) + exp(-v * 1.6) * 0.25;
-          float sides = smoothstep(-3.6, -2.2, vX) * (1.0 - smoothstep(2.2, 3.6, vX));
-          vec3 blue = vec3(0.12, 0.38, 0.82);
-          vec3 gold = vec3(0.98, 0.70, 0.25);
-          vec3 col = ${far ? "mix(blue, gold, smoothstep(-0.5, 2.5, vX))" : "mix(blue, gold * 0.6, smoothstep(0.6, 3.0, vX) * 0.35)"};
-          gl_FragColor = vec4(col, glow * sides * ${far ? "0.22" : "0.32"});
+          float sides = smoothstep(-1.2, -0.85, vS) * (1.0 - smoothstep(1.05, 1.2, vS));
+          vec3 blue = vec3(0.16, 0.46, 1.0);
+          vec3 gold = vec3(1.0, 0.72, 0.26);
+          ${
+            far
+              ? "float glow = pow(sin(v * 3.14159), 2.0); vec3 col = mix(blue, gold, smoothstep(0.2, 1.1, vS) * 0.5); float a = glow * 0.05;"
+              : "float line = exp(-v * 28.0); float veil = exp(-v * 5.0); float mist = exp(-v * 1.6); float glow = line * 0.75 + veil * 0.4 + mist * 0.1; vec3 col = mix(blue, gold, smoothstep(0.15, 0.85, vS)); float a = glow;"
+          }
+          gl_FragColor = vec4(col, a * sides);
         }
       `,
     })
-  const silkGeo = new THREE.PlaneGeometry(7.2, 1, 220, 1)
+  const silkGeo = new THREE.PlaneGeometry(2.4, 1, 260, 120)
   silkGeo.translate(0, 0.5, 0) // uv.y = 0 sur la crête, 1 en bas
   const silkNear = new THREE.Mesh(silkGeo, silkMat(false))
   const silkFar = new THREE.Mesh(silkGeo, silkMat(true))
@@ -209,6 +238,8 @@ export function mountDustWaves(container: HTMLElement) {
     camera.position.z = w / h < 0.8 ? 5.2 : 4
     uniforms.uFocus.value = camera.position.z
     camera.updateProjectionMatrix()
+    // Demi-largeur visible au plan de la vague : la crête est placée en proportion de l'écran.
+    uniforms.uHalfW.value = Math.tan((camera.fov * Math.PI) / 360) * camera.position.z * camera.aspect
     uniforms.uScale.value = h * dpr * 0.012
   }
   resize()
@@ -217,7 +248,7 @@ export function mountDustWaves(container: HTMLElement) {
   // Parallaxe très légère à la souris
   const target = new THREE.Vector2()
   const onMove = (e: PointerEvent) => {
-    target.set((e.clientX / window.innerWidth - 0.5) * 0.18, -(e.clientY / window.innerHeight - 0.5) * 0.1)
+    target.set((e.clientX / window.innerWidth - 0.5) * 0.14, -(e.clientY / window.innerHeight - 0.5) * 0.08)
   }
   window.addEventListener("pointermove", onMove, { passive: true })
 
@@ -236,7 +267,6 @@ export function mountDustWaves(container: HTMLElement) {
     camera.lookAt(0, 0, 0)
     renderer.render(scene, camera)
   }
-  if (reduce) renderer.render(scene, camera)
   tick()
 
   return () => {

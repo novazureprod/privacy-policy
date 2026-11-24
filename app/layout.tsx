@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#0a0c10",
+  themeColor: "#112250",
   colorScheme: "dark",
 }
 
@@ -37,7 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="relative min-h-screen antialiased">
         <a
           href="#contenu"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-full focus:bg-[var(--nz-gold)] focus:px-5 focus:py-2 focus:text-[#0a0c10]"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-full focus:bg-[var(--nz-gold)] focus:px-5 focus:py-2 focus:text-[#112250]"
         >
           Aller au contenu
         </a>

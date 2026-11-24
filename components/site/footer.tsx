@@ -6,7 +6,7 @@ import { FloatingActions } from "./floating-actions"
 /** Pied de page commun : navigation, activités, contact et pages légales. */
 export function Footer() {
   return (
-    <footer className="relative border-t border-[rgba(147,197,253,0.12)] px-5 pt-16 pb-28 sm:px-10 lg:pb-10">
+    <footer className="relative border-t border-[rgba(245,240,233,0.12)] px-5 pt-16 pb-28 sm:px-10 lg:pb-10">
       <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <p className="metal-text font-display text-lg font-extrabold tracking-[0.3em]">NOVAZURE</p>
@@ -67,7 +67,7 @@ export function Footer() {
           </ul>
         </div>
       </div>
-      <div className="mx-auto mt-14 flex max-w-6xl flex-col items-center justify-between gap-3 border-t border-[rgba(147,197,253,0.08)] pt-6 text-xs text-[var(--nz-muted)] sm:flex-row">
+      <div className="mx-auto mt-14 flex max-w-6xl flex-col items-center justify-between gap-3 border-t border-[rgba(245,240,233,0.08)] pt-6 text-xs text-[var(--nz-muted)] sm:flex-row">
         <p>© 2026 Novazure. Tous droits réservés.</p>
         <p className="flex gap-5">
           <Link href="/mentions-legales" className="footer-link">

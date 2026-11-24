@@ -29,7 +29,7 @@ export function FloatingActions() {
         target="_blank"
         rel="noopener"
         tabIndex={shown ? 0 : -1}
-        className="glass glass-gold pointer-events-auto mx-auto flex items-center gap-2 rounded-full !bg-[rgba(10,12,16,0.88)] px-6 py-3 font-sub text-[11px] tracking-[0.2em] text-[var(--nz-gold)] uppercase lg:hidden"
+        className="glass glass-gold pointer-events-auto mx-auto flex items-center gap-2 rounded-full !bg-[rgba(17,34,80,0.88)] px-6 py-3 font-sub text-[11px] tracking-[0.2em] text-[var(--nz-gold)] uppercase lg:hidden"
       >
         <CalendarDays className="h-4 w-4" aria-hidden="true" />
         Rendez-vous

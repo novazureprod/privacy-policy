@@ -93,7 +93,7 @@ export function VideoGrid({
               <span className="relative block aspect-video overflow-hidden">
                 <img src={`/films/${v.youtubeId}.webp`} alt="" loading="lazy" className="h-full w-full object-cover" />
                 <span className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                <span className="play absolute top-1/2 left-1/2 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-[#14203a]">
+                <span className="play absolute top-1/2 left-1/2 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-[#112250]">
                   <Play className="ml-0.5 h-5 w-5" aria-hidden="true" />
                 </span>
               </span>
@@ -127,7 +127,7 @@ export function VideoGrid({
                 <X className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
-            <div className="aspect-video overflow-hidden rounded-2xl border border-[rgba(147,197,253,0.22)] bg-black">
+            <div className="aspect-video overflow-hidden rounded-2xl border border-[rgba(245,240,233,0.22)] bg-black">
               <iframe
                 key={active.youtubeId}
                 src={`${youtubeEmbed(active.youtubeId)}&autoplay=1`}

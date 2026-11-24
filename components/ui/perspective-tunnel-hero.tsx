@@ -124,7 +124,7 @@ function TunnelCard({ card, progress, pointer, total, stage }: TunnelCardProps) 
             }}
             className="pointer-events-auto absolute left-1/2 top-1/2 aspect-[4/5] will-change-transform select-none cursor-pointer"
         >
-            <div className="group relative h-full w-full overflow-hidden rounded-2xl bg-[var(--nz-night)] shadow-2xl shadow-black/90 ring-1 ring-[rgba(147,197,253,0.22)] transition-all duration-500 hover:ring-[var(--nz-gold)]">
+            <div className="group relative h-full w-full overflow-hidden rounded-2xl bg-[var(--nz-night)] shadow-2xl shadow-black/90 ring-1 ring-[rgba(245,240,233,0.22)] transition-all duration-500 hover:ring-[var(--nz-gold)]">
                 <img
                     src={card.item.src}
                     alt={card.item.title}
@@ -244,12 +244,12 @@ export default function PerspectiveTunnelHero({
             }}
         >
             {/* Immersive Background Grid & Glow */}
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(147,197,253,0.35)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,#000_60%,transparent_100%)] opacity-70 dark:opacity-65" />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.16)_0%,transparent_72%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(245,240,233,0.35)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,#000_60%,transparent_100%)] opacity-70 dark:opacity-65" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(224,197,143,0.16)_0%,transparent_72%)]" />
 
             {/* Depth Ring Guides */}
-            <div className="pointer-events-none absolute h-[48vmin] w-[48vmin] rounded-full border border-[rgba(92,184,255,0.18)]" />
-            <div className="pointer-events-none absolute h-[76vmin] w-[76vmin] rounded-full border border-dashed border-[rgba(147,197,253,0.12)]" />
+            <div className="pointer-events-none absolute h-[48vmin] w-[48vmin] rounded-full border border-[rgba(224,197,143,0.18)]" />
+            <div className="pointer-events-none absolute h-[76vmin] w-[76vmin] rounded-full border border-dashed border-[rgba(245,240,233,0.12)]" />
 
             {/* Central Anchor Typography */}
             <motion.div

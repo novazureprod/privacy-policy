@@ -20,5 +20,5 @@ export function LegalPage({ title, updated, children }: { title: string; updated
 
 /** Champ à compléter, mis en évidence pour ne pas être oublié avant la mise en ligne. */
 export function ToFill({ children }: { children: ReactNode }) {
-  return <mark className="rounded bg-[rgba(92,184,255,0.18)] px-1.5 py-0.5 text-[var(--nz-gold)]">{children}</mark>
+  return <mark className="rounded bg-[rgba(224,197,143,0.18)] px-1.5 py-0.5 text-[var(--nz-gold)]">{children}</mark>
 }
